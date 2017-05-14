@@ -5,7 +5,7 @@ machine:
     # review-me.margffoy-tuay.com: 127.0.0.1:3000
   environment:
     # For Coveralls
-    COVERALLS_REPO_TOKEN: hUyo0WxL7HxdL0tmwqpyKZAwJf4qlWujf
+    COVERALLS_REPO_TOKEN: XziZEdjP7cG3OLh8Aw2MST9rqrn0uUXTL
     MONGO_URL: mongodb://127.0.0.1:27017
     ROOT_URL: http://checklist.margffoy-tuay.com
     TEST_BROWSER_DRIVER: phantomjs
