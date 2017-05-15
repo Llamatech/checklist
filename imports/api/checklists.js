@@ -229,7 +229,7 @@ export const addUser = new ValidatedMethod({
     validate: new SimpleSchema({
         checklistId: {
             type: String
-        }
+        },
         username: {
             type: String
         },
