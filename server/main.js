@@ -1,7 +1,7 @@
 /* global WebApp, Modules */
 
 import { Meteor } from 'meteor/meteor';
-import '../imports/api/projects.js';
+// import '../imports/api/projects.js';
 
 
 

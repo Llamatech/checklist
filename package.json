@@ -2,7 +2,7 @@
   "name": "checklist",
   "private": true,
   "scripts": {
-    "start": "meteor run",
+    "start": "meteor --settings settings-development.json",
     "lint": "eslint .",
     "coverage-app-unit": "spacejam --driver-package=practicalmeteor:mocha-console-runner test --coverage 'out_lcovonly out_coverage out_html' --port 3004"
   },
