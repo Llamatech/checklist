@@ -218,7 +218,7 @@ export const updateItemStatus = new ValidatedMethod({
 
         Checklists.update({'_id': checklistId, 'items._id': itemId}, {
             $set: {
-                "items.$.done": status
+                'items.$.done': status
             }
         });
     }
@@ -260,7 +260,7 @@ export const removeUser = new ValidatedMethod({
     validate: new SimpleSchema({
         checklistId: {
             type: String
-        }
+        },
         username: {
             type: String
         }
@@ -286,10 +286,10 @@ export const updateUserPermissions = new ValidatedMethod({
     validate: new SimpleSchema({
         checklistId: {
             type: String
-        }
+        },
         username: {
             type: String
-        }
+        },
         updateWrite: {
             type: Boolean
         }
@@ -304,6 +304,6 @@ export const updateUserPermissions = new ValidatedMethod({
             $set: {
                 'sharedWith.$.writePerm': updateWrite
             }
-        })
+        });
     }
 });
