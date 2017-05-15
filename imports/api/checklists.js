@@ -119,7 +119,7 @@ export const insertItem = new ValidatedMethod({
         for(user in checklist.sharedwith) {
             if(user.username === Meteor.user().services.facebook.username) {
                 userFound = true;
-                readPerm = user.writePerm;
+                writePerm = user.writePerm;
                 break;
             }
         }
@@ -165,7 +165,7 @@ export const deleteItem = new ValidatedMethod({
         for(user in checklist.sharedwith) {
             if(user.username === Meteor.user().services.facebook.username) {
                 userFound = true;
-                readPerm = user.writePerm;
+                writePerm = user.writePerm;
                 break;
             }
         }
@@ -186,3 +186,124 @@ export const deleteItem = new ValidatedMethod({
     }
 });
 
+export const updateItemStatus = new ValidatedMethod({
+    name: 'checklists.updateItemStatus',
+    validate: new SimpleSchema({
+        checklistId: {
+            type: String
+        },
+        itemId: {
+            type: ObjectId(),
+            blackbox: true
+        },
+        status: {
+            type: Boolean
+        }
+    }).validator(),
+    run({checklistId, itemId, status}) {
+        const checklist = Checklists.find(checklistId).fetch()[0];
+        let userFound = false;
+        let writePerm = false;
+        for(user in checklist.sharedwith) {
+            if(user.username === Meteor.user().services.facebook.username) {
+                userFound = true;
+                writePerm = user.writePerm;
+                break;
+            }
+        }
+
+        if(!userFound || userFound && !writePerm) {
+            throw new Meteor.Error('checklists.deleteItem', 'Cannot mark an item as done/not done because you are not authorized to do it');
+        }
+
+        Checklists.update({'_id': checklistId, 'items._id': itemId}, {
+            $set: {
+                'items.$.done': status
+            }
+        });
+    }
+});
+
+export const addUser = new ValidatedMethod({
+    name: 'checklists.addUser',
+    validate: new SimpleSchema({
+        checklistId: {
+            type: String
+        },
+        username: {
+            type: String
+        },
+        writePerm: {
+            type: Boolean
+        }
+    }).validator(),
+    run({checklistId, username, writePerm}) {
+        const checklist = Checklists.find(checklistId).fetch()[0];
+        if(checklist.owner !== Meteor.user().services.facebook.username)
+        {
+            throw new Meteor.Error('checklists.addUser', 'Cannot share this checklist with another user because you are not its owner');
+        }
+        Checklists.update(checklistId, {
+            $push: {
+                sharedWith: {
+                    '_id': ObjectId(),
+                    'username': username,
+                    'writePerm': writePerm
+                }
+            }
+        });
+    }
+});
+
+export const removeUser = new ValidatedMethod({
+    name: 'checklists.removeUser',
+    validate: new SimpleSchema({
+        checklistId: {
+            type: String
+        },
+        username: {
+            type: String
+        }
+    }).validator(),
+    run({checklistId, username}) {
+        const checklist = Checklists.find(checklistId).fetch()[0];
+        if(checklist.owner !== Meteor.user().services.facebook.username)
+        {
+            throw new Meteor.Error('checklists.addUser', 'Cannot share this checklist with another user because you are not its owner');
+        }
+        Checklists.update(checklistId, {
+            $pull: {
+                sharedWith: {
+                    'username': username
+                }
+            }
+        });
+    }
+});
+
+export const updateUserPermissions = new ValidatedMethod({
+    name: 'checklists.removeUser',
+    validate: new SimpleSchema({
+        checklistId: {
+            type: String
+        },
+        username: {
+            type: String
+        },
+        updateWrite: {
+            type: Boolean
+        }
+    }).validator(),
+    run({checklistId, username, updateWrite}) {
+        const checklist = Checklists.find(checklistId).fetch()[0];
+        if(checklist.owner !== Meteor.user().services.facebook.username)
+        {
+            throw new Meteor.Error('checklists.addUser', 'Cannot update user checklist permissions because you are not its owner');
+        }
+        Checklists.update({'_id': checklistId, 'sharedWith.username': username}, {
+            $set: {
+                'sharedWith.$.writePerm': updateWrite
+            }
+        });
+    }
+});
