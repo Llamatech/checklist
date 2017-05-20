@@ -36,3 +36,5 @@ practicalmeteor:mocha-console-runner
 mdg:validated-method
 aldeed:simple-schema
 ddp-rate-limiter
+accounts-facebook
+accounts-google
