@@ -83,6 +83,10 @@ class Navib extends React.Component {
                       <LoginButton icon='fa-google'
                                    service='Google'
                                    login={this.props.login}/>}
+                    {Meteor.user() ? null :
+                      <LoginButton icon='fa-twitter'
+                                   service='Twitter'
+                                   login={this.props.login}/>}
                   </Navbar.Form>
                   {Meteor.user()?
                   <Nav>

@@ -32,6 +32,11 @@ class App extends Component {
         const options = {
             requestPermissions: ['email']
         };
+
+        if ( service === 'loginWithTwitter' ) {
+            delete options.requestPermissions;
+        }
+
         Meteor[service](options, (err) => {
             const user = Meteor.user();
             console.log(user);
