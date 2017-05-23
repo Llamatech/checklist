@@ -19,6 +19,12 @@ if(Meteor.server)
     describe('Groups', function() {
         beforeEach(function() {
             Groups.remove({});
+            Groups.insert({
+                name: 'DefaultGroup',
+                description: 'You shouldn\'t be looking at this',
+                owner: 'llama2@llama.com',
+                members: []
+            });
         });
 
         it('Should create a group', function() {
@@ -31,7 +37,7 @@ if(Meteor.server)
 
             Meteor.call('group.insert', {group}, function() {
                 const result = Groups.find({});
-                assert.equal(result.count(), 1);
+                assert.equal(result.count(), 2);
             });
         });
     });
