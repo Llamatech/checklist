@@ -5,6 +5,7 @@ import {Mongo} from 'meteor/mongo';
 import ObjectId from 'bson-objectid';
 import {ValidatedMethod} from 'meteor/mdg:validated-method';
 import {SimpleSchema} from 'meteor/aldeed:simple-schema';
+import getEmailFromService from '../../server/methods/users.js';
 // import {DDPRateLimiter} from 'meteor/ddp-rate-limiter';
 
 export const Checklists = new Mongo.Collection('checklists');
@@ -54,7 +55,7 @@ export const insertChecklist = new ValidatedMethod({
         }
     }).validator(),
     run({checklist}) {
-        Checklists.insert(checklist);
+        Checklists.insert(checklist.checklist);
     }
 });
 
@@ -66,8 +67,8 @@ export const deleteChecklist = new new ValidatedMethod({
         }
     }).validator(),
     run({checklistId}) {
-        const checklist = Checklists.find(item.checklistId).fetch()[0];
-        if(checklist.owner !== Meteor.user().services.facebook.username)
+        const checklist = Checklists.find(checklistId).fetch()[0];
+        if(checklist.owner !== getEmailFromService(Meteor.user().services))
         {
             throw new Meteor.Error('checklists.deleteChecklist', 'Cannot delete this checklist because you are not its owner');
         }
@@ -117,7 +118,7 @@ export const insertItem = new ValidatedMethod({
         let userFound = false;
         let writePerm = false;
         for(user in checklist.sharedwith) {
-            if(user.username === Meteor.user().services.facebook.username) {
+            if(user.username === getEmailFromService(Meteor.user().services)) {
                 userFound = true;
                 writePerm = user.writePerm;
                 break;
@@ -133,7 +134,7 @@ export const insertItem = new ValidatedMethod({
                     '_id': ObjectId(),
                     'name': item.name,
                     'quantity': item.quantity,
-                    'addedBy': Meteor.user().services.facebook.username,
+                    'addedBy': getEmailFromService(Meteor.user().services),
                     'assignedTo': item.assignedTo,
                     'createdAt': item.createdAt,
                     'completeBefore': item.completeBefore,
@@ -163,7 +164,7 @@ export const deleteItem = new ValidatedMethod({
         let userFound = false;
         let writePerm = false;
         for(user in checklist.sharedwith) {
-            if(user.username === Meteor.user().services.facebook.username) {
+            if(user.username === getEmailFromService(Meteor.user().services)) {
                 userFound = true;
                 writePerm = user.writePerm;
                 break;
@@ -205,7 +206,7 @@ export const updateItemStatus = new ValidatedMethod({
         let userFound = false;
         let writePerm = false;
         for(user in checklist.sharedwith) {
-            if(user.username === Meteor.user().services.facebook.username) {
+            if(user.username === getEmailFromService(Meteor.user().services)) {
                 userFound = true;
                 writePerm = user.writePerm;
                 break;
@@ -239,7 +240,7 @@ export const addUser = new ValidatedMethod({
     }).validator(),
     run({checklistId, username, writePerm}) {
         const checklist = Checklists.find(checklistId).fetch()[0];
-        if(checklist.owner !== Meteor.user().services.facebook.username)
+        if(checklist.owner !== getEmailFromService(Meteor.user().services))
         {
             throw new Meteor.Error('checklists.addUser', 'Cannot share this checklist with another user because you are not its owner');
         }
@@ -267,7 +268,7 @@ export const removeUser = new ValidatedMethod({
     }).validator(),
     run({checklistId, username}) {
         const checklist = Checklists.find(checklistId).fetch()[0];
-        if(checklist.owner !== Meteor.user().services.facebook.username)
+        if(checklist.owner !== getEmailFromService(Meteor.user().services))
         {
             throw new Meteor.Error('checklists.addUser', 'Cannot share this checklist with another user because you are not its owner');
         }
@@ -296,7 +297,7 @@ export const updateUserPermissions = new ValidatedMethod({
     }).validator(),
     run({checklistId, username, updateWrite}) {
         const checklist = Checklists.find(checklistId).fetch()[0];
-        if(checklist.owner !== Meteor.user().services.facebook.username)
+        if(checklist.owner !== getEmailFromService(Meteor.user().services))
         {
             throw new Meteor.Error('checklists.addUser', 'Cannot update user checklist permissions because you are not its owner');
         }
