@@ -13,7 +13,7 @@ if(Meteor.server)
                     'email': 'llama@llama.com'
                 }
             }
-        }
+        };
     };
 
     describe('Groups', function() {

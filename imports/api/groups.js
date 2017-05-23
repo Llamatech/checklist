@@ -2,7 +2,6 @@
 
 import {Meteor} from 'meteor/meteor';
 import {Mongo} from 'meteor/mongo';
-import ObjectId from 'bson-objectid';
 import {ValidatedMethod} from 'meteor/mdg:validated-method';
 import {SimpleSchema} from 'meteor/aldeed:simple-schema';
 import getEmailFromService from '../../server/methods/users.js';
@@ -93,7 +92,7 @@ export const addUserGroup = new ValidatedMethod({
             $push: {
                 members: user
             }
-        })
+        });
     }
 });
 
