@@ -36,7 +36,10 @@ export const insertChecklist = new ValidatedMethod({
             optional: true
         },
         'checklist.items': {
-            type: Array,
+            type: Array
+        },
+        'checklist.items.$' : {
+            type: Object,
             blackbox: true
         },
         'checklist.owner': {
@@ -50,17 +53,20 @@ export const insertChecklist = new ValidatedMethod({
             optional: true
         },
         'checklist.sharedwith': {
+            type: Array
+        },
+        'checklist.sharedwith.$': {
             type: Object,
             blackbox: true
         }
     }).validator(),
     run({checklist}) {
-        Checklists.insert(checklist.checklist);
+        Checklists.insert(checklist);
     }
 });
 
-export const deleteChecklist = new new ValidatedMethod({
-    name: 'checklists.deleteChecklist',
+export const deleteChecklist = new ValidatedMethod({
+    name: 'checklists.delete',
     validate: new SimpleSchema({
         checklistId: {
             type: String
@@ -70,7 +76,7 @@ export const deleteChecklist = new new ValidatedMethod({
         const checklist = Checklists.find(checklistId).fetch()[0];
         if(checklist.owner !== getEmailFromService(Meteor.user().services))
         {
-            throw new Meteor.Error('checklists.deleteChecklist', 'Cannot delete this checklist because you are not its owner');
+            throw new Meteor.Error('checklists.delete', 'Cannot delete this checklist because you are not its owner');
         }
         Checklists.remove(checklistId);
     }
@@ -82,7 +88,7 @@ export const insertItem = new ValidatedMethod({
         item: {
             type: Object
         },
-        'item.checklistId': {
+        'checklistId': {
             type: String
         },
         'item.name': {
@@ -104,31 +110,36 @@ export const insertItem = new ValidatedMethod({
             optional: true
         },
         'item.assignedTo.$': {
-            type: Object
+            type: Object,
+            blackbox: true
         },
         'item.priority': {
-            type: Number
+            type: Number,
+            optional: true
         },
         'item.done': {
             type: Boolean
         }
     }).validator(),
-    run({item}) {
-        const checklist = Checklists.find(item.checklistId).fetch()[0];
-        let userFound = false;
-        let writePerm = false;
-        for(user in checklist.sharedwith) {
-            if(user.username === getEmailFromService(Meteor.user().services)) {
-                userFound = true;
-                writePerm = user.writePerm;
-                break;
+    run({checklistId, item}) {
+        const checklist = Checklists.find(checklistId).fetch()[0];
+        let userFound = checklist.owner === getEmailFromService(Meteor.user().services);
+        let writePerm = checklist.owner === getEmailFromService(Meteor.user().services);
+        if(!writePerm) {
+            for(var i = 0; i < checklist.sharedwith.length; i++) {
+                var user = checklist.sharedwith[i];
+                if(user.email === getEmailFromService(Meteor.user().services)) {
+                    userFound = true;
+                    writePerm = user.writePerm;
+                    break;
+                }
             }
         }
-        if(!userFound || userFound && !writePerm) {
+        if(!userFound || (userFound && !writePerm)) {
             throw new Meteor.Error('checklists.insertItem', 'Cannot add a new item because you are not authorized to do it');
         }
 
-        Checklists.update(item.checklistId, {
+        Checklists.update(checklistId, {
             $push: {
                 items: {
                     '_id': ObjectId(),
@@ -144,7 +155,7 @@ export const insertItem = new ValidatedMethod({
             }
         });
 
-        return Checklists.find(item.checklistId).fetch()[0].items;
+        return Checklists.find(checklistId).fetch()[0].items;
     }
 });
 
@@ -283,7 +294,7 @@ export const removeUser = new ValidatedMethod({
 });
 
 export const updateUserPermissions = new ValidatedMethod({
-    name: 'checklists.removeUser',
+    name: 'checklists.updateUserPermissions',
     validate: new SimpleSchema({
         checklistId: {
             type: String
