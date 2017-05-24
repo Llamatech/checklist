@@ -1,7 +1,7 @@
 /* eslint-env mocha */
 
 import {Meteor} from 'meteor/meteor';
-import { assert, expect } from 'meteor/practicalmeteor:chai';
+import { assert } from 'meteor/practicalmeteor:chai';
 import {Checklists} from './checklists.js';
 import getEmailFromService from '../../server/methods/users.js';
 
@@ -132,7 +132,7 @@ if(Meteor.server)
             };
 
             const checklist = Checklists.find({}).fetch()[0];
-            Meteor.call('checklists.addItem', {checklistId: checklist['_id'], item:item}, function(err) {
+            Meteor.call('checklists.addItem', {checklistId: checklist['_id'], item:item}, function() {
                 const checklist = Checklists.find({}).fetch()[0];
                 assert.equal(checklist.items.length, 2);
             });
@@ -147,7 +147,7 @@ if(Meteor.server)
             };
 
             const checklist = Checklists.find({}).fetch()[0];
-            Meteor.call('checklists.addItem', {checklistId: checklist['_id'], item:item}, function(err) {
+            Meteor.call('checklists.addItem', {checklistId: checklist['_id'], item:item}, function() {
                 const checklist = Checklists.find({}).fetch()[0];
                 assert.equal(checklist.items.length, 2);
             });
@@ -172,7 +172,7 @@ if(Meteor.server)
             };
 
             const checklist = Checklists.find({}).fetch()[0];
-            Meteor.call('checklists.addItem', {checklistId: checklist['_id'], item:item}, function(err) {
+            Meteor.call('checklists.addItem', {checklistId: checklist['_id'], item:item}, function() {
                 const checklist = Checklists.find({}).fetch()[0];
                 assert.equal(checklist.items.length, 1);
             });
