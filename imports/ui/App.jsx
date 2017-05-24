@@ -57,10 +57,31 @@ class App extends Component {
 
     render() {
         return (
+            <div>
             <Navib login={this.login.bind(this)}
                    logout={this.logout.bind(this)}/>
+                   <br></br>
+                   <br></br>
+                   <br></br>
+                  <div className="container">
+                      {console.log(this.props)}
+                    {React.cloneElement(this.props.children, { listsOwned: this.props.listsOwned, listsShared: this.props.listsShared})}
+                  </div>
+            </div>
         );
     }
 }
 
-export default App;
+
+App.propTypes = {
+    listsOwned: PropTypes.array,
+    listsShared: PropTypes.array
+};
+
+export default createContainer(() => {
+        const a = {
+        listsOwned: [],
+        listsShared: []
+    };
+    return a;
+}, App);

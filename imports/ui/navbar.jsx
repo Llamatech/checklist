@@ -13,6 +13,8 @@ import {
     Modal
 } from 'react-bootstrap';
 import LoginButton from './loginbtn.jsx';
+import { LinkContainer } from 'react-router-bootstrap';
+
 // import PForm from './proyForm';
 
 class Navib extends React.Component {
@@ -57,44 +59,51 @@ class Navib extends React.Component {
     render() {
         return (
             <div>
-              <Navbar collapseOnSelect className="navbar-fixed-top">
+              <Navbar inverse collapseOnSelect className="navbar-fixed-top">
                 <Navbar.Header>
                   <Navbar.Brand>
-                    <a className="logo" onClick={()=>this.props.backHome()}><img src="http://duckit.margffoy-tuay.com/static/checklist.svg" alt="logo" width="20px" style={{float: 'left', 'marginRight': '5px'}}></img>   Checklist</a>
+                    <a className="logo" onClick={()=>this.props.backHome()}><img src="http://duckit.margffoy-tuay.com/static/checklist.svg" alt="logo" width="20px" style={{float: 'left', 'marginRight': '5px'}}></img>   ListHub</a>
                   </Navbar.Brand>
                   <Navbar.Toggle />
                 </Navbar.Header>
                 <Navbar.Collapse>
                   <Nav>
                     <NavItem className="newProj" onClick={this.modalOpen.bind(this)}>
-                      <i className="fa fa-plus fa-lg fa-inverse "></i>    Add new project
+                      <i className="fa fa-plus fa-lg fa-inverse "></i>    Add new list
                     </NavItem>
                   </Nav>
-                  <Navbar.Form pullLeft>
-                    <FormGroup>
-                      <FormControl type="text" aria-label="Search" placeholder="Search" onChange={(event) => this.buscar(event.target.value)}/>
-                    </FormGroup>
-                    {' '}
-                    {Meteor.user() ? null :
-                      <LoginButton icon='fa-facebook'
-                                   service='Facebook'
-                                   login={this.props.login}/>}
-                    {Meteor.user() ? null :
-                      <LoginButton icon='fa-google'
-                                   service='Google'
-                                   login={this.props.login}/>}
-                    {Meteor.user() ? null :
-                      <LoginButton icon='fa-twitter'
-                                   service='Twitter'
-                                   login={this.props.login}/>}
-                  </Navbar.Form>
                   {Meteor.user()?
                   <Nav>
-                  <NavDropdown title={Meteor.user().profile.name} id="basic-nav-dropdown" className="newProj">
-                    <MenuItem onClick={()=>this.props.openMine()}>My projects</MenuItem>
-                    <MenuItem divider />
-                    <MenuItem onClick={() => this.props.logout()}>Logout</MenuItem>
+                      <LinkContainer to="lists">
+                    <NavItem className="newProj" onClick={this.modalOpen.bind(this)}>
+                      My lists
+                    </NavItem>
+                    </LinkContainer>
+
+                    <NavItem className="newProj" onClick={this.modalOpen.bind(this)}>
+                      My groups
+                    </NavItem>
+                  </Nav>
+                      :
+                  <Nav pullRight>
+                  <NavDropdown title="Login" id="basic-nav-dropdown" className="newProj" >
+                     <LoginButton icon='fa-facebook'
+                                   service='Facebook'
+                                   login={this.props.login}/>
+                    <LoginButton icon='fa-google'
+                                    service='Google'
+                                    ogin={this.props.login}/>
+                    <LoginButton icon='fa-twitter'
+                                    service='Twitter'
+                                    login={this.props.login}/>
                   </NavDropdown>
+                </Nav>
+                }
+                  {Meteor.user()?
+                  <Nav pullRight>
+                      <NavItem disabled={true}>
+                          <i className="fa fa-user" aria-hidden="true"></i>  {Meteor.user().profile.name}
+                      </NavItem>
                 </Nav>:null
                 }
                 </Navbar.Collapse>

@@ -3,15 +3,7 @@
 
 import React, {PropTypes} from 'react';
 import {
-    Navbar,
-    NavItem,
-    NavDropdown,
-    MenuItem,
-    Nav,
-    FormGroup,
-    FormControl,
-    Button,
-    Modal
+    MenuItem
 } from 'react-bootstrap';
 
 export default class LoginButton extends React.Component {
@@ -26,10 +18,10 @@ export default class LoginButton extends React.Component {
 
     render() {
         return (
-            <Button type="button" onClick={() => this.props.login(this.state.serviceFunc)}>
+            <MenuItem type="button" onClick={() => this.props.login(this.state.serviceFunc)}>
                 <i className={this.state.icon}></i>
                 {this.state.service}
-            </Button>
+            </MenuItem>
         );
     }
 
