@@ -24,7 +24,7 @@ if(Meteor.server)
                 name: 'DefaultGroup',
                 description: 'You shouldn\'t be looking at this',
                 owner: 'alpaca@alpaca.com',
-                members: []
+                members: [{'name': 'Vicuna', 'email': 'vicuna@vicuna.com'}]
             });
             Meteor.user = function() {
                 return {
@@ -52,9 +52,9 @@ if(Meteor.server)
             });
         });
 
-        it('Should not delete a group if current user differs from its actual owner', function() {
+        it('Should not delete a group (Not Owner)', function() {
             const group = Groups.find({}).fetch()[0];
-            Meteor.call('group.delete', {groupId: group['_id']}, function(err, res) {
+            Meteor.call('group.delete', {groupId: group['_id']}, function(err) {
                 const result = Groups.find({});
                 expect(result.count()).to.equal(1);
                 assert.equal(err.reason, 'Cannot delete this group because you are not its owner');
@@ -80,7 +80,7 @@ if(Meteor.server)
             });
         });
 
-        it('Should add an user to a group (Owner)', function() {
+        it('Should add an user to a group', function() {
             Meteor.user = function() {
                 return {
                     'services': {
@@ -94,12 +94,12 @@ if(Meteor.server)
             let user = {
                 name: 'Llama',
                 email: 'llama@llama.com'
-            }
+            };
 
             const group = Groups.find({}).fetch()[0];
             Meteor.call('group.addUser', {groupId: group['_id'], user: user}, function() {
                 const result = Groups.find({}).fetch()[0];
-                assert.equal(JSON.stringify(user), JSON.stringify(result.members[0]));
+                assert.equal(JSON.stringify(user), JSON.stringify(result.members[1]));
             });
         });
 
@@ -107,13 +107,42 @@ if(Meteor.server)
             let user = {
                 name: 'Llama',
                 email: 'llama@llama.com'
-            }
+            };
 
             const group = Groups.find({}).fetch()[0];
-            Meteor.call('group.addUser', {groupId: group['_id'], user: user}, function(err, res) {
+            Meteor.call('group.addUser', {groupId: group['_id'], user: user}, function(err) {
+                const result = Groups.find({}).fetch()[0];
+                assert.equal(result.members.length, 1);
+                assert.equal(err.reason, 'Cannot add an user to this group because you are not its owner');
+            });
+        });
+
+        it('Should delete a user from a group', function() {
+            Meteor.user = function() {
+                return {
+                    'services': {
+                        'facebook': {
+                            'email': 'alpaca@alpaca.com'
+                        }
+                    }
+                };
+            };
+
+            let userEmail = 'vicuna@vicuna.com';
+            const group = Groups.find({}).fetch()[0];
+            Meteor.call('group.deleteUser', {groupId: group['_id'], 'userEmail': userEmail}, function() {
                 const result = Groups.find({}).fetch()[0];
                 assert.equal(result.members.length, 0);
-                assert.equal(err.reason, 'Cannot add an user to this group because you are not its owner');
+            });
+        });
+
+        it('Should not delete a user from a group (Not Owner)', function() {
+            let userEmail = 'vicuna@vicuna.com';
+            const group = Groups.find({}).fetch()[0];
+            Meteor.call('group.deleteUser', {groupId: group['_id'], 'userEmail': userEmail}, function(err) {
+                const result = Groups.find({}).fetch()[0];
+                assert.equal(result.members.length, 1);
+                assert.equal(err.reason, 'Cannot delete user from this group because you are not its owner');
             });
         });
     });
