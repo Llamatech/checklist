@@ -29,3 +29,4 @@ Meteor.methods({
 });
 
 
+export default _getEmailFromService;
