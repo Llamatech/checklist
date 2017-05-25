@@ -16,9 +16,8 @@ class AddList extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            url: '',
-            description: '',
-            collaborator: ''
+            name: '',
+            description: ''
         };
     }
 
@@ -43,7 +42,7 @@ class AddList extends React.Component {
 
               <Modal show={this.props.show} onHide={()=>this.props.modalClose()}>
                 <Modal.Header closeButton>
-                  <Modal.Title>Add a new project</Modal.Title>
+                  <Modal.Title>Add a new List</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
 

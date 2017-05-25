@@ -101,9 +101,13 @@ class Navib extends React.Component {
                 }
                   {Meteor.user()?
                   <Nav pullRight>
-                      <NavItem disabled={true}>
-                          <i className="fa fa-user" aria-hidden="true"></i>  {Meteor.user().profile.name}
-                      </NavItem>
+
+                      <NavDropdown title={Meteor.user().profile.name} id="basic-nav-dropdown" className="newProj" >
+                          <NavItem onClick={() => this.props.logout(this.state.serviceFunc)}>
+                              Logout
+                          </NavItem>
+                      </NavDropdown>
+
                 </Nav>:null
                 }
                 </Navbar.Collapse>

@@ -65,7 +65,7 @@ class App extends Component {
                    <br></br>
                   <div className="container">
                       {console.log(this.props)}
-                    {React.cloneElement(this.props.children, { listsOwned: this.props.listsOwned, listsShared: this.props.listsShared})}
+                    {React.cloneElement(this.props.children, { listsOwned: this.props.listsOwned, listsShared: this.props.listsShared, groupsOwned: this.props.groupsOwned, groupsIn:this.props.groupsIn})}
                   </div>
             </div>
         );
@@ -80,8 +80,59 @@ App.propTypes = {
 
 export default createContainer(() => {
         const a = {
-        listsOwned: [],
-        listsShared: []
+        listsOwned: [{
+                '_id':1,
+                'name': 'Some owned list',
+                'description': 'What are you looking at',
+                'items': [
+                    {
+                        '_id':1,
+                        'name':'Huevos',
+                        'quantity':'12',
+                        'assignedTo':'',
+                        'completeBefore':'',
+                        'priority': 'high',
+                        'done': false,
+                        'addedBy': 'holi'
+                    },
+                    {
+                        '_id':2,
+                        'name':'Mantequilla de maní',
+                        'quantity':'12',
+                        'assignedTo':'Mamá',
+                        'completeBefore':'',
+                        'priority': 'high',
+                        'done': true,
+                        'addedBy': 'holi'
+                    }
+                ],
+                'owner': 'alpaca@alpaca.com',
+                'sharedwith': ['cami@google.com','margara@facebook.com'],
+                'completed':4,
+                'pending':2
+            },
+            {
+                    '_id':2,
+                    'name': 'Some other owned list',
+                    'description': 'What are you looking at',
+                    'items': [],
+                    'owner': 'alpaca@alpaca.com',
+                    'sharedwith': [],
+                    'completed':2,
+                    'pending':1
+                }],
+        listsShared: [{
+                '_id':3,
+                'name': 'Some random list',
+                'description': 'What are you looking at',
+                'items': [],
+                'owner': 'alpaca@alpaca.com',
+                'sharedwith': [],
+                'completed':5,
+                'pending':6
+            }],
+        groupsOwned:[{name:"grupo1"},{name:"grupo2"},{name:"grupo3"}],
+        groupsIn:[{name:"grupo01"},{name:"grupo02"}]
     };
     return a;
 }, App);
