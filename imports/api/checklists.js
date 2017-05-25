@@ -172,17 +172,19 @@ export const deleteItem = new ValidatedMethod({
     }).validator(),
     run({checklistId, itemId}) {
         const checklist = Checklists.find(checklistId).fetch()[0];
-        let userFound = false;
-        let writePerm = false;
-        for(user in checklist.sharedwith) {
-            if(user.username === getEmailFromService(Meteor.user().services)) {
-                userFound = true;
-                writePerm = user.writePerm;
-                break;
+        let userFound = checklist.owner === getEmailFromService(Meteor.user().services);
+        let writePerm = checklist.owner === getEmailFromService(Meteor.user().services);
+        if(!writePerm) {
+            for(var i = 0; i < checklist.sharedwith.length; i++) {
+                var user = checklist.sharedwith[i];
+                if(user.email === getEmailFromService(Meteor.user().services)) {
+                    userFound = true;
+                    writePerm = user.writePerm;
+                    break;
+                }
             }
         }
-
-        if(!userFound || userFound && !writePerm) {
+        if(!userFound || (userFound && !writePerm)) {
             throw new Meteor.Error('checklists.deleteItem', 'Cannot delete an item because you are not authorized to do it');
         }
 
@@ -194,6 +196,7 @@ export const deleteItem = new ValidatedMethod({
             }
         });
 
+        // console.log(Checklists.find(checklistId).fetch()[0]);
         return Checklists.find(checklistId).fetch()[0].items;
     }
 });
@@ -214,18 +217,21 @@ export const updateItemStatus = new ValidatedMethod({
     }).validator(),
     run({checklistId, itemId, status}) {
         const checklist = Checklists.find(checklistId).fetch()[0];
-        let userFound = false;
-        let writePerm = false;
-        for(user in checklist.sharedwith) {
-            if(user.username === getEmailFromService(Meteor.user().services)) {
-                userFound = true;
-                writePerm = user.writePerm;
-                break;
+        let userFound = checklist.owner === getEmailFromService(Meteor.user().services);
+        let writePerm = checklist.owner === getEmailFromService(Meteor.user().services);
+        if(!writePerm) {
+            for(var i = 0; i < checklist.sharedwith.length; i++) {
+                var user = checklist.sharedwith[i];
+                if(user.email === getEmailFromService(Meteor.user().services)) {
+                    userFound = true;
+                    writePerm = user.writePerm;
+                    break;
+                }
             }
         }
 
         if(!userFound || userFound && !writePerm) {
-            throw new Meteor.Error('checklists.deleteItem', 'Cannot mark an item as done/not done because you are not authorized to do it');
+            throw new Meteor.Error('checklists.updateItemStatus', 'Cannot mark an item as done/not done because you are not authorized to do it');
         }
 
         Checklists.update({'_id': checklistId, 'items._id': itemId}, {
@@ -233,6 +239,8 @@ export const updateItemStatus = new ValidatedMethod({
                 'items.$.done': status
             }
         });
+
+        return Checklists.find(checklistId).fetch()[0].items;
     }
 });
 
@@ -242,14 +250,20 @@ export const addUser = new ValidatedMethod({
         checklistId: {
             type: String
         },
-        username: {
+        user: {
+            type: Object
+        },
+        'user.email': {
             type: String
         },
-        writePerm: {
+        'user.name': {
+            type: String
+        },
+        'user.writePerm': {
             type: Boolean
         }
     }).validator(),
-    run({checklistId, username, writePerm}) {
+    run({checklistId, user}) {
         const checklist = Checklists.find(checklistId).fetch()[0];
         if(checklist.owner !== getEmailFromService(Meteor.user().services))
         {
@@ -257,13 +271,11 @@ export const addUser = new ValidatedMethod({
         }
         Checklists.update(checklistId, {
             $push: {
-                sharedWith: {
-                    '_id': ObjectId(),
-                    'username': username,
-                    'writePerm': writePerm
-                }
+                sharedwith: user
             }
         });
+
+        return Checklists.find(checklistId).fetch()[0].sharedwith;
     }
 });
 
@@ -273,11 +285,11 @@ export const removeUser = new ValidatedMethod({
         checklistId: {
             type: String
         },
-        username: {
+        email: {
             type: String
         }
     }).validator(),
-    run({checklistId, username}) {
+    run({checklistId, email}) {
         const checklist = Checklists.find(checklistId).fetch()[0];
         if(checklist.owner !== getEmailFromService(Meteor.user().services))
         {
@@ -285,11 +297,13 @@ export const removeUser = new ValidatedMethod({
         }
         Checklists.update(checklistId, {
             $pull: {
-                sharedWith: {
-                    'username': username
+                sharedwith: {
+                    'email': email
                 }
             }
         });
+
+        return Checklists.find(checklistId).fetch()[0].sharedwith;
     }
 });
 
@@ -299,22 +313,22 @@ export const updateUserPermissions = new ValidatedMethod({
         checklistId: {
             type: String
         },
-        username: {
+        email: {
             type: String
         },
         updateWrite: {
             type: Boolean
         }
     }).validator(),
-    run({checklistId, username, updateWrite}) {
+    run({checklistId, email, updateWrite}) {
         const checklist = Checklists.find(checklistId).fetch()[0];
         if(checklist.owner !== getEmailFromService(Meteor.user().services))
         {
             throw new Meteor.Error('checklists.addUser', 'Cannot update user checklist permissions because you are not its owner');
         }
-        Checklists.update({'_id': checklistId, 'sharedWith.username': username}, {
+        Checklists.update({'_id': checklistId, 'sharedwith.email': email}, {
             $set: {
-                'sharedWith.$.writePerm': updateWrite
+                'sharedwith.$.writePerm': updateWrite
             }
         });
     }

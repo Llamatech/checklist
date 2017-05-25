@@ -177,7 +177,194 @@ if(Meteor.server)
                 assert.equal(checklist.items.length, 1);
             });
         });
+
+        it('Should delete an item (Owner)', function() {
+            Meteor.user = function() {
+                return {
+                    'services': {
+                        'google': {
+                            'email': 'alpaca@alpaca.com'
+                        }
+                    }
+                };
+            };
+
+            const checklist = Checklists.find({}).fetch()[0];
+            const item = checklist.items[0];
+
+            Meteor.call('checklists.deleteItem', {checklistId: checklist['_id'], itemId: item['_id']}, function(err, res) {
+                if(err) {
+                    throw new Meteor.Error(err);
+                }
+                assert.equal(res.length, 0);
+            });
+        });
+
+        it('Should delete an item (Write permissions)', function() {
+            const checklist = Checklists.find({}).fetch()[0];
+            const item = checklist.items[0];
+            Meteor.call('checklists.deleteItem', {checklistId: checklist['_id'], itemId: item['_id']}, function(err, res) {
+                if(err) {
+                    throw new Meteor.Error(err);
+                }
+                assert.equal(res.length, 0);
+            });
+        });
+
+        it('Should not delete an item (Read permissions)', function() {
+            Meteor.user = function() {
+                return {
+                    'services': {
+                        'facebook': {
+                            'email': 'vicuna@vicuna.com'
+                        }
+                    }
+                };
+            };
+
+            const checklist = Checklists.find({}).fetch()[0];
+            const item = checklist.items[0];
+            Meteor.call('checklists.deleteItem', {checklistId: checklist['_id'], itemId: item['_id']}, function(err) {
+                assert.equal(err.reason, 'Cannot delete an item because you are not authorized to do it');
+            });
+        });
+
+        it('Should change an item status (Owner)', function() {
+            Meteor.user = function() {
+                return {
+                    'services': {
+                        'google': {
+                            'email': 'alpaca@alpaca.com'
+                        }
+                    }
+                };
+            };
+
+            const checklist = Checklists.find({}).fetch()[0];
+            const item = checklist.items[0];
+            Meteor.call('checklists.updateItemStatus', {checklistId: checklist['_id'], itemId: item['_id'], status: true}, function() {
+                const result = Checklists.find({}).fetch()[0];
+                assert(result.items[0].done);
+            });
+        });
+
+        it('Should change an item status (Write permissions)', function() {
+            const checklist = Checklists.find({}).fetch()[0];
+            const item = checklist.items[0];
+            Meteor.call('checklists.updateItemStatus', {checklistId: checklist['_id'], itemId: item['_id'], status: true}, function() {
+                const result = Checklists.find({}).fetch()[0];
+                assert(result.items[0].done);
+            });
+        });
+
+        it('Should not change an item status (Read permissions)', function() {
+            Meteor.user = function() {
+                return {
+                    'services': {
+                        'facebook': {
+                            'email': 'vicuna@vicuna.com'
+                        }
+                    }
+                };
+            };
+
+            const checklist = Checklists.find({}).fetch()[0];
+            const item = checklist.items[0];
+            Meteor.call('checklists.updateItemStatus', {checklistId: checklist['_id'], itemId: item['_id'], status: true}, function(err) {
+                assert.equal(err.reason, 'Cannot mark an item as done/not done because you are not authorized to do it');
+            });
+        });
+
+        it('Should share a list with another user (Owner)', function() {
+            Meteor.user = function() {
+                return {
+                    'services': {
+                        'google': {
+                            'email': 'alpaca@alpaca.com'
+                        }
+                    }
+                };
+            };
+
+            const checklist = Checklists.find({}).fetch()[0];
+            let user = {
+                'name': 'Guanaco',
+                'email': 'guanaco@guanaco.com',
+                'writePerm': true
+            };
+
+            Meteor.call('checklists.addUser', {checklistId: checklist['_id'], user: user}, function() {
+                const result = Checklists.find({}).fetch()[0];
+                assert.equal(JSON.stringify(result.sharedwith[2]), JSON.stringify(user));
+            });
+        });
+
+        it('Should not allow to share a list with another user (Not Owner)', function() {
+            const checklist = Checklists.find({}).fetch()[0];
+            let user = {
+                'name': 'Guanaco',
+                'email': 'guanaco@guanaco.com',
+                'writePerm': true
+            };
+
+            Meteor.call('checklists.addUser', {checklistId: checklist['_id'], user: user}, function(err) {
+                assert.equal(err.reason, 'Cannot share this checklist with another user because you are not its owner');
+            });
+        });
+
+        it('Should remove users from a list (Owner)', function() {
+            Meteor.user = function() {
+                return {
+                    'services': {
+                        'google': {
+                            'email': 'alpaca@alpaca.com'
+                        }
+                    }
+                };
+            };
+
+            const checklist = Checklists.find({}).fetch()[0];
+            let email = 'vicuna@vicuna.com';
+            Meteor.call('checklists.removeUser', {checklistId: checklist['_id'], email: email}, function() {
+                const result = Checklists.find({}).fetch()[0];
+                assert.equal(result.sharedwith.length, 1);
+            });
+        });
+
+        it('Should not allow to remove users from a list (Not Owner)', function() {
+            const checklist = Checklists.find({}).fetch()[0];
+            let email = 'vicuna@vicuna.com';
+            Meteor.call('checklists.removeUser', {checklistId: checklist['_id'], email: email}, function(err) {
+                assert.equal(err.reason, 'Cannot share this checklist with another user because you are not its owner');
+            });
+        });
+
+        it('Should update user write permissions (Owner)', function() {
+            Meteor.user = function() {
+                return {
+                    'services': {
+                        'google': {
+                            'email': 'alpaca@alpaca.com'
+                        }
+                    }
+                };
+            };
+
+            const checklist = Checklists.find({}).fetch()[0];
+            let email = 'vicuna@vicuna.com';
+            Meteor.call('checklists.updateUserPermissions', {checklistId: checklist['_id'], email: email, updateWrite: true}, function() {
+                const result = Checklists.find({}).fetch()[0];
+                assert(result.sharedwith[1].writePerm);
+            });
+        });
+
+        it('Should not allow to update user write permissions (Not Owner)', function() {
+            const checklist = Checklists.find({}).fetch()[0];
+            let email = 'vicuna@vicuna.com';
+            Meteor.call('checklists.updateUserPermissions', {checklistId: checklist['_id'], email: email, updateWrite: true}, function(err) {
+                // console.log(err);
+                assert.equal(err.reason, 'Cannot update user checklist permissions because you are not its owner');
+            });
+        });
     });
-
-
 }
