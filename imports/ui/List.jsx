@@ -106,7 +106,7 @@ class Lists extends Component {
 
 
     render() {
-        console.log(this.props.list)
+        console.log(this.props)
 
             return (
                 <div>
@@ -120,33 +120,33 @@ class Lists extends Component {
                             <div className="col-md-5">
                                 <Form inline>
                                   <FormGroup controlId="formInlineName">
-                                    <ControlLabel className="addPersonLabel">Item</ControlLabel>
+                                    <ControlLabel className="addPersonLabel">Add member: </ControlLabel>
                                     {' '}
-                                    <FormControl type="text" value={this.state.term} placeholder="mom@gmail.com" onChange={this.changeTerm.bind(this)}/>
+                                    <FormControl className="addPerson" type="text" value={this.state.term} placeholder="mom@gmail.com" onChange={this.changeTerm.bind(this)}/>
                                   </FormGroup>
                                   {'  '}
                                   <Button bsSize="small" className="addItem" type="submit" onClick={(e)=>{this.addItem(e)}}>
-                                    Add Member
+                                    Add
                                   </Button>
                                 </Form>
                             </div>
                             <div className="col-md-5">
                                 <Form inline>
                                     <FormGroup controlId="formControlsSelect">
-                                        <ControlLabel className="assignLabel">Assign to:  </ControlLabel>
+                                        <ControlLabel className="addGroupLabel">Add group:  </ControlLabel>
 
-                                        <FormControl componentClass="select" placeholder="">
-                                            <option value="">Don't assign</option>
+                                        <FormControl className="addGroup" componentClass="select" placeholder="">
+                                            <option value="">select</option>
                                             {
-                                                this.props.list.groups && this.props.list.groups.map((group, i)=>{
-                                                    return(<option value={group}>{group}</option>)
+                                                this.props.groups && this.props.groups.map((group)=>{
+                                                    return(<option value={group.name}>{group.name}</option>)
                                                 })
                                             }
                                         </FormControl>
                                       </FormGroup>
                                   {'  '}
                                   <Button bsSize="small" className="addItem" type="submit" onClick={(e)=>{this.addItem(e)}}>
-                                    Add Member
+                                    Add
                                   </Button>
                                 </Form>
                             </div>
@@ -191,7 +191,7 @@ class Lists extends Component {
                                     </tbody>
                                   </Table>
                                   <div className="row">
-                                      <Form inline>
+                                      <Form inline className="newItem">
                                         <FormGroup controlId="formInlineName">
                                           <ControlLabel className="itemLabel">Item</ControlLabel>
                                           {' '}
@@ -211,7 +211,7 @@ class Lists extends Component {
                                             </FormControl>
                                           </FormGroup>
                                         {' '}
-                                        <Button className="addItem" type="submit" onClick={(e)=>{this.addItem(e)}}>
+                                        <Button bsSize="small" className="addItem" type="submit" onClick={(e)=>{this.addItem(e)}}>
                                           Add Item
                                         </Button>
                                       </Form>

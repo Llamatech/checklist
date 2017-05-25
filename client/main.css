@@ -79,11 +79,25 @@ body{
 }
 
 .assignLabel{
-    margin-left: 20px;
+    margin-left: 50px;
 }
 
 .addItem{
     margin-left:20px;
+}
+
+.newItem input, .newItem select{
+    height: 25px !important;
+    margin-left: 10px !important;
+}
+
+.addPerson{
+    margin-left: 10px;
+}
+
+.addGroup{
+    margin-left: 10px;
+    min-width: 100px;
 }
 
 
