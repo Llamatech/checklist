@@ -58,6 +58,12 @@ export const insertChecklist = new ValidatedMethod({
         'checklist.sharedwith.$': {
             type: Object,
             blackbox: true
+        },
+        'checklist.pending': {
+            type: Number
+        },
+        'checklist.completed': {
+            type: Number
         }
     }).validator(),
     run({checklist}) {
@@ -155,6 +161,17 @@ export const insertItem = new ValidatedMethod({
             }
         });
 
+        let increase = Number(item.done);
+        let totalPending = checklist.pending + (1 - increase);
+        let totalCompleted = checklist + increase;
+
+        Checklists.update(checklistId, {
+            $set: {
+                'pending': totalPending,
+                'completed': totalCompleted
+            }
+        });
+
         return Checklists.find(checklistId).fetch()[0].items;
     }
 });
@@ -188,11 +205,30 @@ export const deleteItem = new ValidatedMethod({
             throw new Meteor.Error('checklists.deleteItem', 'Cannot delete an item because you are not authorized to do it');
         }
 
+        let checkItem = Checklists.find(checklistId, {
+            items: {
+                $elemMatch: {
+                    '_id': itemId
+                }
+            }
+        }).fetch()[0].items[0];
+
+        let decrease = Number(checkItem.done);
+        let pendingUpdate = checklist.pending - (1 - decrease);
+        let completedUpdate = checklist.completed - decrease;
+
         Checklists.update(checklistId, {
             $pull: {
                 items: {
                     '_id': itemId
                 }
+            }
+        });
+
+        Checklists.update(checklistId, {
+            $set: {
+                'pending': pendingUpdate,
+                'completed': completedUpdate
             }
         });
 
@@ -234,9 +270,20 @@ export const updateItemStatus = new ValidatedMethod({
             throw new Meteor.Error('checklists.updateItemStatus', 'Cannot mark an item as done/not done because you are not authorized to do it');
         }
 
+        let update = Number(status);
+        let pendingUpdate = checklist.pending + (1 - update);
+        let completedUpdate = checklist.completed + update;
+
         Checklists.update({'_id': checklistId, 'items._id': itemId}, {
             $set: {
                 'items.$.done': status
+            }
+        });
+
+        Checklists.update(checklistId, {
+            $set: {
+                'pending': pendingUpdate,
+                'completed': completedUpdate
             }
         });
 

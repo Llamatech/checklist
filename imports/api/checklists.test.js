@@ -44,7 +44,9 @@ if(Meteor.server)
                     'name': 'Vicuna',
                     'email': 'vicuna@vicuna.com',
                     'writePerm': false
-                }]
+                }],
+                'completed': 0,
+                'pending': 0
             });
 
             let item = {
@@ -77,7 +79,9 @@ if(Meteor.server)
                 'items': [],
                 'owner': email,
                 'createdAt': new Date(),
-                'sharedwith': []
+                'sharedwith': [],
+                'completed': 0,
+                'pending': 0
             };
 
             Meteor.call('checklists.insert', {checklist}, function() {
