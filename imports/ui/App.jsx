@@ -143,7 +143,12 @@ export default createContainer(() => {
                     email: emailsito
                 }
             }
-    }).fetch(),
+    }).fetch().filter((obj)=>{
+        if (obj.owner===emailsito){
+            return false;
+        }
+        return true;
+    }),
     groupsOwned: Groups.find({
         owner: emailsito
     }).fetch(),
