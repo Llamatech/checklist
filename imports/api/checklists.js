@@ -134,8 +134,7 @@ export const insertItem = new ValidatedMethod({
             optional: true
         },
         'item.assignedTo.$': {
-            type: Object,
-            blackbox: true
+            type: String,
         },
         'item.priority': {
             type: Number,
@@ -181,7 +180,7 @@ export const insertItem = new ValidatedMethod({
 
         let increase = Number(item.done);
         let totalPending = checklist.pending + (1 - increase);
-        let totalCompleted = checklist + increase;
+        let totalCompleted = checklist.completed + increase;
 
         Checklists.update(checklistId, {
             $set: {
@@ -288,8 +287,9 @@ export const updateItemStatus = new ValidatedMethod({
             throw new Meteor.Error('checklists.updateItemStatus', 'Cannot mark an item as done/not done because you are not authorized to do it');
         }
 
-        let update = Number(status);
-        let pendingUpdate = checklist.pending + (1 - update);
+        let update = Number(status)?1:-1;
+
+        let pendingUpdate = checklist.pending - update;
         let completedUpdate = checklist.completed + update;
 
         Checklists.update({'_id': checklistId, 'items._id': itemId}, {

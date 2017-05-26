@@ -2,24 +2,32 @@
  no-unused-vars */
 import React, {Component} from 'react';
 import {chunk} from 'lodash';
-import {FormGroup, FormControl, Button, ControlLabel, Well} from 'react-bootstrap';
+import {FormGroup, FormControl, Button, ControlLabel, Well, Modal} from 'react-bootstrap';
 
-import AddList from './AddList.jsx';
-import List from './List.jsx'
+import AddGroup from './AddGroup.jsx';
+//import Group from './Group.jsx'
 
-class Lists extends Component {
+import SweetAlert from 'react-bootstrap-sweetalert';
+
+
+class Groups extends Component {
 
     constructor(props) {
         super(props);
         this.state = {
-            selectedList: null,
+            selectedGroup: null,
             term: '',
             showModal:false,
             owned:false,
             alert: false,
             alertText: '',
-            conf: null
+            conf: null,
+            showAdd:false,
+            showRemove:false,
+            addMember:''
         }
+
+        this.addMember=this.addMember.bind(this);
     }
 
     changeTerm(e) {
@@ -34,11 +42,34 @@ class Lists extends Component {
         this.setState({showModal: true});
     }
 
-    addList(){
+    addClose() {
+        this.setState({showAdd: false});
+    }
+
+    addOpen(group) {
+        console.log("open el puto add")
+        console.log(group);
+        this.setState({showAdd: true, selectedGroup: group});
+    }
+
+    removeClose() {
+        this.setState({showRemove: false});
+    }
+
+    removeOpen() {
+        this.setState({showRemove: true});
+    }
+
+    addGroup(){
         console.log("añadiiiiir");
     }
 
-    confirmation(listId){
+    confirmation(e, groupId){
+        e.preventDefault();
+        console.log(e);
+
+        console.log(groupId);
+
 
         const getAlert = () => (
             <SweetAlert
@@ -47,15 +78,15 @@ class Lists extends Component {
             confirmBtnText="Yes, delete it!"
             confirmBtnBsStyle="danger"
             cancelBtnBsStyle="default"
-            title="Are you sure you want to delete this list?"
+            title="Are you sure you want to delete this group?"
             onCancel={()=>{
                 this.fileSave();
             }}
             onConfirm={()=>{
-                this.fileDeleted(listId);
+                this.fileDeleted(groupId);
             }}
             >
-            Your list will be permanently deleted.
+            Your group will be permanently deleted.
             </SweetAlert>
         );
 
@@ -66,7 +97,7 @@ class Lists extends Component {
 
     fileSave() {
         const getAlert = () => (
-            <SweetAlert error confirmBtnText="Ok" confirmBtnBsStyle="danger" title="Your list was not deleted" onConfirm={() => {
+            <SweetAlert error confirmBtnText="Ok" confirmBtnBsStyle="danger" title="Your group was not deleted" onConfirm={() => {
                 this.hideAlert();
             }}></SweetAlert>
         );
@@ -74,12 +105,12 @@ class Lists extends Component {
         this.setState({conf: getAlert()});
     }
 
-    fileDeleted(listId) {
+    fileDeleted(groupId) {
         const getAlert = () => (
-            <SweetAlert success confirmBtnText="Ok" confirmBtnBsStyle="success" title="Your list was successfully deleted" onConfirm={() => {
+            <SweetAlert success confirmBtnText="Ok" confirmBtnBsStyle="success" title="Your group was successfully deleted" onConfirm={() => {
                 this.hideAlert();
-                //this.props.eraseProject(this.props.proyecto._id);
-                console.log("deleted"+listId);
+                Meteor.call('group.delete',{groupId:groupId})
+                console.log("deleted"+groupId);
             }}></SweetAlert>
         );
 
@@ -90,6 +121,19 @@ class Lists extends Component {
         this.setState({conf: null});
     }
 
+    addMember(e){
+        e.preventDefault();
+        //console.log(this.state.addMember)
+        console.log(e);
+
+        Meteor.call('group.addUser', {groupId:this.state.selectedGroup._id, user:{email:this.state.addMember,name:''}})
+
+    }
+
+    handleMemberChange(e){
+        this.setState({addMember:e.target.value})
+    }
+
 
     render() {
         var patr = new RegExp(this.state.term,"i");
@@ -97,20 +141,47 @@ class Lists extends Component {
         return (
             <div>
 
-                {this.state.selectedList
-                    ? <div className="List">
+                {this.state.conf}
 
-                            <Button bsStyle="primary" style={{float:"right"}} onClick={() => this.setState({selectedList: null})} bsSize="small"><i className="fa fa-arrow-left" aria-hidden="true"></i>  Go back to my lists</Button>
-                            <List list={this.state.selectedList} owned={this.state.owned}/>
-                        </div>
-                    : <div>
-                        <h1 className="header">My Lists
+                <Modal show={this.state.showAdd} onHide={()=>this.addClose()}>
+                  <Modal.Header closeButton>
+                    <Modal.Title>Add a new Member to your group</Modal.Title>
+                  </Modal.Header>
+                  <Modal.Body>
+
+                    <form onSubmit={this.addMember.bind(this)}>
+                      <FormGroup controlId="formBasicText">
+                        <ControlLabel>Member's identifier:</ControlLabel>
+
+                        <FormControl
+                          type="text"
+                          value={this.state.name}
+                          placeholder="mom@google.com"
+                          onChange={this.handleMemberChange.bind(this)}
+                        />
+                        <FormControl.Feedback />
+                      </FormGroup>
+                      <FormGroup>
+                          <Button type="submit">
+                            Create
+                          </Button>
+                      </FormGroup>
+                    </form>
+
+                  </Modal.Body>
+                  <Modal.Footer>
+                    <a onClick={()=>this.addClose()}>Close</a>
+                  </Modal.Footer>
+                </Modal>
+
+
+                        <h1 className="header">My Groups
                         </h1>
                         <hr></hr>
 
                         <div className="row">
                             <div className="col-md-2">
-                                <h4>Search your lists</h4>
+                                <h4>Search your groups</h4>
 
                             </div>
                             <div className="col-md-4">
@@ -118,44 +189,58 @@ class Lists extends Component {
                             </div>
                             <div className="col-md-3"></div>
                             <div className="col-md-3">
-                                <Button className="newList" onClick={this.modalOpen.bind(this)} bsStyle="warning" bsSize="large"> <i className="fa fa-plus fa-lg fa-inverse "></i> Add new list</Button>
-                            <AddList show={this.state.showModal} modalClose={this.modalClose.bind(this)} addList={this.addList.bind(this)} />
+                                <Button className="newGroup" onClick={this.modalOpen.bind(this)} bsStyle="primary" > <i className="fa fa-plus fa-lg fa-inverse "></i> Add new group</Button>
+                            <AddGroup show={this.state.showModal} modalClose={this.modalClose.bind(this)} addGroup={this.addGroup.bind(this)} />
                             </div>
                         </div>
 
-                        <div className="Lists">
+                        <div className="Groups">
                             {console.log(this.props)}
                             <br></br>
                             <div className="row">
                                 <div className="col-md-6 owned">
 
-                                    <h2>Lists owned by me</h2>
+                                    <h2>Groups owned by me</h2>
                                     <hr></hr>
                                     {
-                                        this.props.listsOwned && this.props.listsOwned.map((list) => {
-                                        if(patr.test(list.name)||patr.test(list.description)){
+                                        this.props.groupsOwned && this.props.groupsOwned.map((group) => {
+                                        if(patr.test(group.name)||patr.test(group.description)){
                                             return(
                                                     <div>
-                                                <Well bsSize="small" className="listBut">
-                                                    <a type="button" onClick={() => this.confirmation(list._id)} className="close proyClose" aria-label="Erase list">
+                                                <Well bsSize="small" className="groupBut">
+                                                    <a type="button" onClick={(e) => this.confirmation(e,group._id)} className="close proyClose" aria-label="Erase group">
                                             <span aria-hidden="true">×</span>
                                         </a>
 
                                                     <div className="row" >
 
-                                                        <div className="listWell col-md-11" onClick={()=>{this.setState({selectedList: list,owned:true})}}>
-                                                        {console.log(list.name)}
-                                                        <h4>{list.name}</h4>
+                                                        <div className="groupWell col-md-11" onClick={()=>{this.setState({selectedGroup: group,owned:true})}}>
+                                                        {console.log(group.name)}
+                                                        <h3>{group.name}</h3>
                                                         <div className="row">
                                                             <div className="col-md-6">
                                                         <p>
-                                                            {list.description}
+                                                            {group.description}
                                                         </p>
+                                                        <h4>Members</h4>
+                                                        <ul>
+                                                            {
+                                                                group.members && group.members.map((member)=>{
+                                                                    return(<li>{member.email}</li>)
+                                                                })
+                                                            }
+                                                        </ul>
                                                     </div>
                                                     <div className="col-md-6">
-                                                        <i className="fa fa-check done"></i>   <strong>Tasks completed: </strong>{list.completed}
-                                                        <br></br>
-                                                        <i className="fa fa-circle-o notDone"></i>    <strong>  Tasks pending: </strong>{list.pending}
+                                                        <div className="row">
+                                                            <div className="col-md-6">
+                                                                {console.log(group)}
+                                                                <Button bsSize="small" className="newGroup" onClick={()=>{this.addOpen(group)}} bsStyle="primary" > <i className="fa fa-plus fa-lg fa-inverse "></i> Add member</Button>
+                                                            </div>
+                                                            <div className="col-md-6">
+                                                                <Button bsSize="small" className="newGroup" onClick={this.removeOpen.bind(this)} bsStyle="danger" > <i className="fa fa-minus fa-lg fa-inverse "></i> Remove member</Button>
+                                                            </div>
+                                                        </div>
                                                     </div>
                                                         </div>
                                                         </div>
@@ -172,32 +257,35 @@ class Lists extends Component {
                                 </div>
 
                                 <div className="col-md-6 owned">
-                                    <h2>Lists shared with me</h2>
+                                    <h2>Groups I'm in</h2>
                                     <hr></hr>
                                     {
-                                        this.props.listsShared && this.props.listsShared.map((list) => {
-                                        if(patr.test(list.name)){
+                                        this.props.groupsIn && this.props.groupsIn.map((group) => {
+                                        if(patr.test(group.name)){
                                             return(
                                                 <div>
-                                            <Well bsSize="small" className="listBut">
-                                                <div className="row" onClick={()=>{this.setState({selectedList: list,owned:true})}}>
+                                            <Well bsSize="small" className="groupBut">
+                                                <div className="row" onClick={()=>{this.setState({selectedGroup: group,owned:true})}}>
 
-                                                    <div className="listWell col-md-12">
-                                                    {console.log(list.name)}
-                                                    <h4>{list.name}</h4>
+                                                    <div className="groupWell col-md-12">
+                                                    {console.log(group.name)}
+                                                    <h4>{group.name}</h4>
                                                     <div className="row">
                                                         <div className="col-md-6">
                                                     <p>
-                                                        {list.description}
+                                                        {group.description}
                                                         <br></br>
                                                         <br></br>
-                                                        <strong>Owner: </strong>{list.owner}
+                                                        <strong>Owner: </strong>{group.owner}
                                                     </p>
-                                                </div>
-                                                <div className="col-md-6">
-                                                    <i className="fa fa-check done"></i>   <strong>Tasks completed: </strong>{list.completed}
-                                                    <br></br>
-                                                    <i className="fa fa-circle-o notDone"></i>    <strong>  Tasks pending: </strong>{list.pending}
+                                                    <h4>Members</h4>
+                                                    <ul>
+                                                        {
+                                                            group.members && group.members.map((member)=>{
+                                                                return(<li>{member.email}</li>)
+                                                            })
+                                                        }
+                                                    </ul>
                                                 </div>
                                                     </div>
                                                     </div>
@@ -218,8 +306,7 @@ class Lists extends Component {
 
                         </div>
                     </div>
-                }
-            </div>
+
 
         );
 
@@ -227,4 +314,4 @@ class Lists extends Component {
 
 }
 
-export default Lists;
+export default Groups;

@@ -5,15 +5,17 @@ export default class Landing extends Component {
   render() {
     return (
       <div className='container-fluid landing'>
-        <div className='row landing-welcome'>
-          <h1>ActiveU</h1>
-          <p>¡Bienvenido a <b>ActiveU</b>! El lugar donde el campus universitario
-            se vuelve más interactivo. Buscamos conectar personas dentro del
-            campus para realizar diferentes actividades y mejorar la experiencia
-            universitaria.</p>
+        <div className='text-center row landing-welcome'>
+          <h1 className="title">ListHub   </h1>
+          <img src="http://duckit.margffoy-tuay.com/static/checklist.svg"></img>
+          <br></br>
+          <br></br>
+          <br></br>
+          <p className="about">Welcome to <strong>ListHub!</strong> We want to make your life easier by providing you with the way to share
+      your lists. Make a group, add members, make your list and start checking off! ListHub is great for your family grocery lists and
+  to keep track of items to buy for parties. Login with your twitter, google, or facebook account to learn more! </p>
         </div>
         <div className='row landing-more'>
-          <h2>Conoce Más</h2>
         </div>
       </div>
     );

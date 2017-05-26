@@ -10,6 +10,7 @@ import {
     HelpBlock
 } from 'react-bootstrap';
 import axios from 'axios';
+//import {Checklists} from '../api/checklists.js'
 
 class AddList extends React.Component {
 
@@ -17,23 +18,40 @@ class AddList extends React.Component {
         super(props);
         this.state = {
             name: '',
-            description: ''
+            description: '',
+            date: new Date(0),
+            errorAlert: false,
+            goodAlert: false
         };
     }
 
-    handleChangeUrl(e) {
-        this.setState({url: e.target.value, errorAlert: false, goodAlert: false});
+    handleChangeName(e) {
+        console.log(e.target.value);
+        this.setState({name: e.target.value, errorAlert: false, goodAlert: false});
     }
     handleChangeDesc(e) {
+        console.log(e.target.value);
+        console.log(this.state.date)
         this.setState({description: e.target.value, errorAlert: false, goodAlert: false});
     }
-    handleChangeCollab(e) {
-        this.setState({collaborator: e.target.value, errorAlert: false, goodAlert: false});
+    handleChangeDate(e) {
+        var date = e.target.valueAsDate;
+        date.setDate(date.getDate()+1);
+        console.log(date);
+        this.setState({date: date, errorAlert: false, goodAlert: false});
     }
 
     addList(evt) {
         evt.preventDefault();
-        this.props.addList();
+        var checklist = {};
+        checklist.name = this.state.name;
+        checklist.description = this.state.description;
+        checklist.completeBefore = this.state.date;
+
+        Meteor.call('checklists.insert',{checklist},(err,res)=>{
+            console.log(err);
+            console.log(res);
+        })
     }
 
     render() {
@@ -48,37 +66,34 @@ class AddList extends React.Component {
 
                   <form onSubmit={this.addList.bind(this)}>
                     <FormGroup controlId="formBasicText">
-                      <ControlLabel>Github repository</ControlLabel>
+                      <ControlLabel>Give your list a name!</ControlLabel>
 
                       <FormControl
                         type="text"
-                        value={this.state.url}
-                        placeholder="https://github.com/ownerName/repoName"
-                        onChange={this.handleChangeUrl.bind(this)}
+                        value={this.state.name}
+                        placeholder="Monthly Shopping List"
+                        onChange={this.handleChangeName.bind(this)}
                       />
                       <FormControl.Feedback />
-                        <HelpBlock>For the moment, we are only working with github repositories. In the future, we'd love to add support for other repository
-                        sites, but for now, please make sure your repo link matches the one given as example.</HelpBlock>
-
                     </FormGroup>
                     <FormGroup controlId="formControlsTextarea">
-                      <ControlLabel>Description</ControlLabel>
-                        <HelpBlock>Try to convey what your project means to you, what you hope to achieve, and short and long term goals
-                        that you might have. This description is what others we'll see when they open your project, so make it interesting!
-                        Remember that your repo should also have a description, as that is the short summary you see in the project
-                        thumbnails. If you add a webpage to the repo, it will be shown here.</HelpBlock>
-                      <FormControl componentClass="textarea" placeholder="My project is the best and you should collaborate with me!"
+                      <ControlLabel>Your list's description:</ControlLabel>
+
+                      <FormControl componentClass="textarea" placeholder="This months groceries!"
                         value={this.state.description} onChange={this.handleChangeDesc.bind(this)}/>
                     </FormGroup>
-                    <FormGroup controlId="formControlsTextarea">
-                      <ControlLabel>The ideal collaborator for this project is...</ControlLabel>
-                        <HelpBlock>In this section, we give you the oportunity to define who the ideal collaborator for your project would be.
-                        You are welcome to leave this section empty, and it simply won't show up on your project page.</HelpBlock>
-                      <FormControl componentClass="textarea" placeholder="textarea"
-                        placeholder="Well versed in java, with some knowledge of javascript and a passion for leaning things on the go"
-                        value= {this.state.collaborator} onChange={this.handleChangeCollab.bind(this)}/>
+                    <FormGroup controlId="formBasicText">
+                      <ControlLabel>Deadline:</ControlLabel>
+
+                      <FormControl
+                        type="date"
+                        onChange={this.handleChangeDate.bind(this)}
+                      />
+                      <FormControl.Feedback />
+                    </FormGroup>
+                    <FormGroup>
                         <Button type="submit">
-                          Send
+                          Create
                         </Button>
                     </FormGroup>
                   </form>
