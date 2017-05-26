@@ -29,9 +29,12 @@ if(Meteor.server)
                 };
             };
             Checklists.remove({});
+            var someDate = new Date();
+            someDate.setDate(someDate.getDate() + 5);
             Checklists.insert({
                 'name': 'Some random list',
                 'description': 'What are you looking at',
+                'completeBefore': someDate,
                 'items': [],
                 'owner': 'alpaca@alpaca.com',
                 'createdAt': new Date(),
@@ -56,8 +59,22 @@ if(Meteor.server)
                 'done': false
             };
 
+            // let user1 = {
+            //     'name': 'Llama',
+            //     'email': 'llama@llama.com',
+            //     'writePerm': true
+            // };
+
+            // let user2 = {
+            //     'name': 'Vicuna',
+            //     'email': 'vicuna@vicuna.com',
+            //     'writePerm': false
+            // }
+
             let checklist = Checklists.find({}).fetch()[0];
             Meteor.call('checklists.addItem', {checklistId: checklist['_id'], item: item});
+            // Meteor.call('checklists.addUser', {checklistId: checklist['_id'], user: user1});
+            // Meteor.call('checklists.addUser', {checklistId: checklist['_id'], user: user2});
 
             Meteor.user = function() {
                 return {
@@ -73,15 +90,12 @@ if(Meteor.server)
 
         it('Should create a new checklist', function() {
             let email = getEmailFromService(Meteor.user().services);
+            var someDate = new Date();
+            someDate.setDate(someDate.getDate() + 5);
             let checklist = {
                 'name': 'A super llama list',
                 'description': 'Baaaa',
-                'items': [],
-                'owner': email,
-                'createdAt': new Date(),
-                'sharedwith': [],
-                'completed': 0,
-                'pending': 0
+                'completeBefore': someDate
             };
 
             Meteor.call('checklists.insert', {checklist}, function() {
@@ -372,16 +386,13 @@ if(Meteor.server)
         });
 
         it('Should retrieve all user owned lists', function() {
-            let email = getEmailFromService(Meteor.user().services);
+            // let email = getEmailFromService(Meteor.user().services);
+            var someDate = new Date();
+            someDate.setDate(someDate.getDate() + 5);
             let checklist = {
                 'name': 'A super llama list',
                 'description': 'Baaaa',
-                'items': [],
-                'owner': email,
-                'createdAt': new Date(),
-                'sharedwith': [],
-                'completed': 0,
-                'pending': 0
+                'completeBefore': someDate
             };
 
             Meteor.call('checklists.insert', {checklist});
@@ -396,17 +407,14 @@ if(Meteor.server)
                 };
             };
 
-            email = getEmailFromService(Meteor.user().services);
+            // email = getEmailFromService(Meteor.user().services);
 
+            someDate = new Date();
+            someDate.setDate(someDate.getDate() + 5);
             let checklist2 = {
                 'name': 'A super alpaca list',
                 'description': 'Fuerza Peru',
-                'items': [],
-                'owner': email,
-                'createdAt': new Date(),
-                'sharedwith': [],
-                'completed': 0,
-                'pending': 0
+                'completeBefore': someDate
             };
 
             Meteor.call('checklists.insert', {checklist: checklist2});
@@ -420,16 +428,13 @@ if(Meteor.server)
         });
 
         it('Should retrieve lists shared with an user', function() {
-            let email = getEmailFromService(Meteor.user().services);
+            // let email = getEmailFromService(Meteor.user().services);
+            var someDate = new Date();
+            someDate.setDate(someDate.getDate() + 5);
             let checklist = {
                 'name': 'A super llama list',
                 'description': 'Baaaa',
-                'items': [],
-                'owner': email,
-                'createdAt': new Date(),
-                'sharedwith': [],
-                'completed': 0,
-                'pending': 0
+                'completeBefore': someDate
             };
 
             let user = {
