@@ -370,5 +370,107 @@ if(Meteor.server)
                 assert.equal(err.reason, 'Cannot update user checklist permissions because you are not its owner');
             });
         });
+
+        it('Should retrieve all user owned lists', function() {
+            let email = getEmailFromService(Meteor.user().services);
+            let checklist = {
+                'name': 'A super llama list',
+                'description': 'Baaaa',
+                'items': [],
+                'owner': email,
+                'createdAt': new Date(),
+                'sharedwith': [],
+                'completed': 0,
+                'pending': 0
+            };
+
+            Meteor.call('checklists.insert', {checklist});
+
+            Meteor.user = function() {
+                return {
+                    'services': {
+                        'google': {
+                            'email': 'alpaca@alpaca.com'
+                        }
+                    }
+                };
+            };
+
+            email = getEmailFromService(Meteor.user().services);
+
+            let checklist2 = {
+                'name': 'A super alpaca list',
+                'description': 'Fuerza Peru',
+                'items': [],
+                'owner': email,
+                'createdAt': new Date(),
+                'sharedwith': [],
+                'completed': 0,
+                'pending': 0
+            };
+
+            Meteor.call('checklists.insert', {checklist: checklist2});
+
+            Meteor.call('checklists.getUserOwnedLists', {}, function(err, res) {
+                if(err) {
+                    throw new Meteor.Error(err);
+                }
+                assert.equal(res.length, 2);
+            });
+        });
+
+        it('Should retrieve lists shared with an user', function() {
+            let email = getEmailFromService(Meteor.user().services);
+            let checklist = {
+                'name': 'A super llama list',
+                'description': 'Baaaa',
+                'items': [],
+                'owner': email,
+                'createdAt': new Date(),
+                'sharedwith': [],
+                'completed': 0,
+                'pending': 0
+            };
+
+            let user = {
+                'name': 'Guanaco',
+                'email': 'guanaco@guanaco.com',
+                'writePerm': true
+            };
+
+            Meteor.call('checklists.insert', {checklist});
+            checklist = Checklists.find({}).fetch()[1];
+            Meteor.call('checklists.addUser', {checklistId: checklist['_id'], user: user});
+
+            Meteor.user = function() {
+                return {
+                    'services': {
+                        'google': {
+                            'email': 'alpaca@alpaca.com'
+                        }
+                    }
+                };
+            };
+
+            checklist = Checklists.find({}).fetch()[0];
+            Meteor.call('checklists.addUser', {checklistId: checklist['_id'], user: user});
+
+            Meteor.user = function() {
+                return {
+                    'services': {
+                        'twitter': {
+                            'screenName': 'guanaco@guanaco.com'
+                        }
+                    }
+                };
+            };
+
+            Meteor.call('checklists.getUserLists', {}, function(err, res) {
+                if(err) {
+                    throw new Meteor.Error(err);
+                }
+                assert.equal(res.length, 2);
+            });
+        });
     });
 }
