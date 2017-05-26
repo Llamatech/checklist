@@ -4,9 +4,16 @@ import {Meteor} from 'meteor/meteor';
 import {Mongo} from 'meteor/mongo';
 import {ValidatedMethod} from 'meteor/mdg:validated-method';
 import {SimpleSchema} from 'meteor/aldeed:simple-schema';
-import getEmailFromService from '../../server/methods/users.js';
+// import getEmailFromService from '../../server/methods/users.js';
 
 export const Groups = new Mongo.Collection('groups');
+
+const getEmailFromService = ( services ) => {
+    for ( let service in services ) {
+        let current = services[ service ];
+        return service === 'twitter' ? current.screenName : current.email;
+    }
+};
 
 Groups.deny({
     insert() {
