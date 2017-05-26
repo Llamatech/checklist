@@ -82,6 +82,18 @@ export const deleteGroup = new ValidatedMethod({
     }
 });
 
+export const getGroup = new ValidatedMethod({
+    name: 'group.get',
+    validate: new SimpleSchema({
+        groupId: {
+            type: String
+        }
+    }).validator(),
+    run({groupId}) {
+        return Groups.find(groupId).fetch()[0];
+    }
+});
+
 export const addUserGroup = new ValidatedMethod({
     name: 'group.addUser',
     validate: new SimpleSchema({

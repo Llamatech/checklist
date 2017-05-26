@@ -71,7 +71,7 @@ class AddList extends React.Component {
                       <FormControl
                         type="text"
                         value={this.state.name}
-                        placeholder="https://github.com/ownerName/repoName"
+                        placeholder="Monthly Shopping List"
                         onChange={this.handleChangeName.bind(this)}
                       />
                       <FormControl.Feedback />
@@ -79,7 +79,7 @@ class AddList extends React.Component {
                     <FormGroup controlId="formControlsTextarea">
                       <ControlLabel>Your list's description:</ControlLabel>
 
-                      <FormControl componentClass="textarea" placeholder="My project is the best and you should collaborate with me!"
+                      <FormControl componentClass="textarea" placeholder="This months groceries!"
                         value={this.state.description} onChange={this.handleChangeDesc.bind(this)}/>
                     </FormGroup>
                     <FormGroup controlId="formBasicText">
@@ -87,7 +87,6 @@ class AddList extends React.Component {
 
                       <FormControl
                         type="date"
-                        placeholder="https://github.com/ownerName/repoName"
                         onChange={this.handleChangeDate.bind(this)}
                       />
                       <FormControl.Feedback />

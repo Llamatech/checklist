@@ -2,6 +2,7 @@
 
 import { Meteor } from 'meteor/meteor';
 import '../imports/api/checklists.js'
+import '../imports/api/groups.js'
 
 Meteor.startup(() => {
   // code to run on server at startup

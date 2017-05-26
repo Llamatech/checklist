@@ -2,9 +2,9 @@
  no-unused-vars */
 import React, {Component} from 'react';
 import {chunk} from 'lodash';
-import {FormGroup, FormControl, Button, ControlLabel, Well} from 'react-bootstrap';
+import {FormGroup, FormControl, Button, ControlLabel, Well, Modal} from 'react-bootstrap';
 
-//import AddGroup from './AddGroup.jsx';
+import AddGroup from './AddGroup.jsx';
 //import Group from './Group.jsx'
 
 import SweetAlert from 'react-bootstrap-sweetalert';
@@ -21,7 +21,9 @@ class Groups extends Component {
             owned:false,
             alert: false,
             alertText: '',
-            conf: null
+            conf: null,
+            showAdd:false,
+            showRemove:false
         }
     }
 
@@ -35,6 +37,22 @@ class Groups extends Component {
 
     modalOpen() {
         this.setState({showModal: true});
+    }
+
+    addClose() {
+        this.setState({showAdd: false});
+    }
+
+    addOpen() {
+        this.setState({showAdd: true});
+    }
+
+    removeClose() {
+        this.setState({showRemove: false});
+    }
+
+    removeOpen() {
+        this.setState({showRemove: true});
     }
 
     addGroup(){
@@ -86,7 +104,7 @@ class Groups extends Component {
         const getAlert = () => (
             <SweetAlert success confirmBtnText="Ok" confirmBtnBsStyle="success" title="Your group was successfully deleted" onConfirm={() => {
                 this.hideAlert();
-                //this.props.eraseProject(this.props.proyecto._id);
+                Meteor.call('group.delete',{groupId:groupId})
                 console.log("deleted"+groupId);
             }}></SweetAlert>
         );
@@ -98,13 +116,20 @@ class Groups extends Component {
         this.setState({conf: null});
     }
 
+    addMember(){
+
+    }
+
 
     render() {
         var patr = new RegExp(this.state.term,"i");
 
         return (
             <div>
+
                 {this.state.conf}
+
+                
 
                 {this.state.selectedGroup
                     ? <div className="Group">
@@ -127,7 +152,7 @@ class Groups extends Component {
                             <div className="col-md-3"></div>
                             <div className="col-md-3">
                                 <Button className="newGroup" onClick={this.modalOpen.bind(this)} bsStyle="primary" > <i className="fa fa-plus fa-lg fa-inverse "></i> Add new group</Button>
-                            {/*<AddGroup show={this.state.showModal} modalClose={this.modalClose.bind(this)} addGroup={this.addGroup.bind(this)} />*/}
+                            <AddGroup show={this.state.showModal} modalClose={this.modalClose.bind(this)} addGroup={this.addGroup.bind(this)} />
                             </div>
                         </div>
 
@@ -159,11 +184,23 @@ class Groups extends Component {
                                                         <p>
                                                             {group.description}
                                                         </p>
+                                                        <ul>
+                                                            {
+                                                                group.members && group.members.map((member)=>{
+                                                                    <il>{member.email}</il>
+                                                                })
+                                                            }
+                                                        </ul>
                                                     </div>
                                                     <div className="col-md-6">
-                                                        <i className="fa fa-check done"></i>   <strong>Tasks completed: </strong>{group.completed}
-                                                        <br></br>
-                                                        <i className="fa fa-circle-o notDone"></i>    <strong>  Tasks pending: </strong>{group.pending}
+                                                        <div className="row">
+                                                            <div className="col-md-6">
+                                                                <Button bsSize="small" className="newGroup" onClick={this.modalOpen.bind(this)} bsStyle="primary" > <i className="fa fa-plus fa-lg fa-inverse "></i> Add member</Button>
+                                                            </div>
+                                                            <div className="col-md-6">
+                                                                <Button bsSize="small" className="newGroup" onClick={this.modalOpen.bind(this)} bsStyle="danger" > <i className="fa fa-minus fa-lg fa-inverse "></i> Remove member</Button>
+                                                            </div>
+                                                        </div>
                                                     </div>
                                                         </div>
                                                         </div>
@@ -180,7 +217,7 @@ class Groups extends Component {
                                 </div>
 
                                 <div className="col-md-6 owned">
-                                    <h2>Groups shared with me</h2>
+                                    <h2>Groups I'm in</h2>
                                     <hr></hr>
                                     {
                                         this.props.groupsIn && this.props.groupsIn.map((group) => {
@@ -201,11 +238,6 @@ class Groups extends Component {
                                                         <br></br>
                                                         <strong>Owner: </strong>{group.owner}
                                                     </p>
-                                                </div>
-                                                <div className="col-md-6">
-                                                    <i className="fa fa-check done"></i>   <strong>Tasks completed: </strong>{group.completed}
-                                                    <br></br>
-                                                    <i className="fa fa-circle-o notDone"></i>    <strong>  Tasks pending: </strong>{group.pending}
                                                 </div>
                                                     </div>
                                                     </div>
