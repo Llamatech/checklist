@@ -59,7 +59,7 @@ export const insertGroup = new ValidatedMethod({
         Groups.insert({
             'name': group.name,
             'description': description,
-            'members': [],
+            'members': [{email:getEmailFromService(Meteor.user().services),name:''}],
             'owner': getEmailFromService(Meteor.user().services)
         });
     }

@@ -148,7 +148,7 @@ class Lists extends Component {
 
     }
 
-    addGroup(){
+    addGroup(e){
         e.preventDefault();
         console.log(this.state.addGroup);
         Meteor.call('group.get',this.state.addGroup,(err,res)=>{

@@ -23,8 +23,11 @@ class Groups extends Component {
             alertText: '',
             conf: null,
             showAdd:false,
-            showRemove:false
+            showRemove:false,
+            addMember:''
         }
+
+        this.addMember=this.addMember.bind(this);
     }
 
     changeTerm(e) {
@@ -43,8 +46,10 @@ class Groups extends Component {
         this.setState({showAdd: false});
     }
 
-    addOpen() {
-        this.setState({showAdd: true});
+    addOpen(group) {
+        console.log("open el puto add")
+        console.log(group);
+        this.setState({showAdd: true, selectedGroup: group});
     }
 
     removeClose() {
@@ -116,8 +121,17 @@ class Groups extends Component {
         this.setState({conf: null});
     }
 
-    addMember(){
+    addMember(e){
+        e.preventDefault();
+        //console.log(this.state.addMember)
+        console.log(e);
 
+        Meteor.call('group.addUser', {groupId:this.state.selectedGroup._id, user:{email:this.state.addMember,name:''}})
+
+    }
+
+    handleMemberChange(e){
+        this.setState({addMember:e.target.value})
     }
 
 
@@ -129,14 +143,38 @@ class Groups extends Component {
 
                 {this.state.conf}
 
-                
+                <Modal show={this.state.showAdd} onHide={()=>this.addClose()}>
+                  <Modal.Header closeButton>
+                    <Modal.Title>Add a new Member to your group</Modal.Title>
+                  </Modal.Header>
+                  <Modal.Body>
 
-                {this.state.selectedGroup
-                    ? <div className="Group">
+                    <form onSubmit={this.addMember.bind(this)}>
+                      <FormGroup controlId="formBasicText">
+                        <ControlLabel>Member's identifier:</ControlLabel>
 
-                            <Button bsStyle="primary" style={{float:"right"}} onClick={() => this.setState({selectedGroup: null})} bsSize="small"><i className="fa fa-arrow-left" aria-hidden="true"></i>  Go back to my groups</Button>
-                        </div>
-                    : <div>
+                        <FormControl
+                          type="text"
+                          value={this.state.name}
+                          placeholder="mom@google.com"
+                          onChange={this.handleMemberChange.bind(this)}
+                        />
+                        <FormControl.Feedback />
+                      </FormGroup>
+                      <FormGroup>
+                          <Button type="submit">
+                            Create
+                          </Button>
+                      </FormGroup>
+                    </form>
+
+                  </Modal.Body>
+                  <Modal.Footer>
+                    <a onClick={()=>this.addClose()}>Close</a>
+                  </Modal.Footer>
+                </Modal>
+
+
                         <h1 className="header">My Groups
                         </h1>
                         <hr></hr>
@@ -178,16 +216,17 @@ class Groups extends Component {
 
                                                         <div className="groupWell col-md-11" onClick={()=>{this.setState({selectedGroup: group,owned:true})}}>
                                                         {console.log(group.name)}
-                                                        <h4>{group.name}</h4>
+                                                        <h3>{group.name}</h3>
                                                         <div className="row">
                                                             <div className="col-md-6">
                                                         <p>
                                                             {group.description}
                                                         </p>
+                                                        <h4>Members</h4>
                                                         <ul>
                                                             {
                                                                 group.members && group.members.map((member)=>{
-                                                                    <il>{member.email}</il>
+                                                                    return(<li>{member.email}</li>)
                                                                 })
                                                             }
                                                         </ul>
@@ -195,10 +234,11 @@ class Groups extends Component {
                                                     <div className="col-md-6">
                                                         <div className="row">
                                                             <div className="col-md-6">
-                                                                <Button bsSize="small" className="newGroup" onClick={this.modalOpen.bind(this)} bsStyle="primary" > <i className="fa fa-plus fa-lg fa-inverse "></i> Add member</Button>
+                                                                {console.log(group)}
+                                                                <Button bsSize="small" className="newGroup" onClick={()=>{this.addOpen(group)}} bsStyle="primary" > <i className="fa fa-plus fa-lg fa-inverse "></i> Add member</Button>
                                                             </div>
                                                             <div className="col-md-6">
-                                                                <Button bsSize="small" className="newGroup" onClick={this.modalOpen.bind(this)} bsStyle="danger" > <i className="fa fa-minus fa-lg fa-inverse "></i> Remove member</Button>
+                                                                <Button bsSize="small" className="newGroup" onClick={this.removeOpen.bind(this)} bsStyle="danger" > <i className="fa fa-minus fa-lg fa-inverse "></i> Remove member</Button>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -238,6 +278,14 @@ class Groups extends Component {
                                                         <br></br>
                                                         <strong>Owner: </strong>{group.owner}
                                                     </p>
+                                                    <h4>Members</h4>
+                                                    <ul>
+                                                        {
+                                                            group.members && group.members.map((member)=>{
+                                                                return(<li>{member.email}</li>)
+                                                            })
+                                                        }
+                                                    </ul>
                                                 </div>
                                                     </div>
                                                     </div>
@@ -258,8 +306,7 @@ class Groups extends Component {
 
                         </div>
                     </div>
-                }
-            </div>
+
 
         );
 

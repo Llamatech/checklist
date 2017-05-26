@@ -43,7 +43,7 @@ class AddGroup extends React.Component {
 
         Meteor.call('group.insert',{group},(err,res)=>{
             console.log(err);
-            console.log(res);
+            console.log(res);            
         })
     }
 
