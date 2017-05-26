@@ -35,39 +35,49 @@ export const insertChecklist = new ValidatedMethod({
             type: String,
             optional: true
         },
-        'checklist.items': {
-            type: Array
-        },
-        'checklist.items.$' : {
-            type: Object,
-            blackbox: true
-        },
-        'checklist.owner': {
-            type: String
-        },
-        'checklist.createdAt': {
-            type: Date
-        },
+        // 'checklist.items': {
+        //     type: Array
+        // },
+        // 'checklist.items.$' : {
+        //     type: Object,
+        //     blackbox: true
+        // },
+        // 'checklist.owner': {
+        //     type: String
+        // },
+        // 'checklist.createdAt': {
+        //     type: Date
+        // },
         'checklist.completeBefore': {
             type: Date,
             optional: true
         },
-        'checklist.sharedwith': {
-            type: Array
-        },
-        'checklist.sharedwith.$': {
-            type: Object,
-            blackbox: true
-        },
-        'checklist.pending': {
-            type: Number
-        },
-        'checklist.completed': {
-            type: Number
-        }
+        // 'checklist.sharedwith': {
+        //     type: Array
+        // },
+        // 'checklist.sharedwith.$': {
+        //     type: Object,
+        //     blackbox: true
+        // },
+        // 'checklist.pending': {
+        //     type: Number
+        // },
+        // 'checklist.completed': {
+        //     type: Number
+        // }
     }).validator(),
     run({checklist}) {
-        Checklists.insert(checklist);
+        Checklists.insert({
+            name: checklist.name,
+            description: checklist.description,
+            items: [],
+            owner: getEmailFromService(Meteor.user().services),
+            createdAt: new Date(),
+            completeBefore: checklist.completeBefore,
+            sharedwith: [],
+            pending: 0,
+            completed:0
+        });
     }
 });
 
