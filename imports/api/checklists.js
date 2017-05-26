@@ -380,3 +380,31 @@ export const updateUserPermissions = new ValidatedMethod({
         });
     }
 });
+
+export const getUserOwnedChecklists = new ValidatedMethod({
+    name: 'checklists.getUserOwnedLists',
+    validate: new SimpleSchema({}).validator(),
+    run() {
+        let email = getEmailFromService(Meteor.user().services);
+
+        return Checklists.find({
+            owner: email
+        }).fetch();
+    }
+});
+
+export const getUserLists = new ValidatedMethod({
+    name: 'checklists.getUserLists',
+    validate: new SimpleSchema({}).validator(),
+    run() {
+        let email = getEmailFromService(Meteor.user().services);
+
+        return Checklists.find({
+            sharedwith: {
+                $elemMatch: {
+                    email: email
+                }
+            }
+        }).fetch();
+    }
+});
