@@ -131,27 +131,35 @@ export default createContainer(() => {
     }
     console.log(emailsito)
 
+
+
     return {
         listsOwned:Checklists.find({
         owner: emailsito
     }).fetch(),
     listsShared:Checklists.find({
         sharedwith: {
-            $elemMatch: {
-                $eq:emailsito
+                $elemMatch: {
+                    email: emailsito
+                }
             }
-        }
     }).fetch(),
     groupsOwned: Groups.find({
         owner: emailsito
     }).fetch(),
-    groupsIn: Groups.find({
+    groupsIn: Groups.find(
+        {
         members: {
             $elemMatch: {
-                $eq:emailsito
+                email: emailsito
             }
         }
-    }).fetch()
+    }).fetch().filter((obj)=>{
+        if (obj.owner===emailsito){
+            return false;
+        }
+        return true;
+    })
 };
 
 }

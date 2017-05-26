@@ -336,7 +336,7 @@ export const addUser = new ValidatedMethod({
         }
         Checklists.update(checklistId, {
             $push: {
-                sharedwith: user.email
+                sharedwith: user
             }
         });
 

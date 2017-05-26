@@ -151,10 +151,10 @@ class Lists extends Component {
     addGroup(e){
         e.preventDefault();
         console.log(this.state.addGroup);
-        Meteor.call('group.get',this.state.addGroup,(err,res)=>{
+        Meteor.call('group.get',{groupId:this.state.addGroup},(err,res)=>{
             console.log(err);
             console.log(res);
-            res.map((user)=>{
+            res.members.map((user)=>{
                 Meteor.call('checklists.addUser',{checklistId:this.props.list._id,user:{email:user.email,name:' ',writePerm:true}},(err,res)=>{
                         console.log(err);
                         this.setState({members:res,addMember:''})
@@ -274,10 +274,12 @@ class Lists extends Component {
                                             <FormControl onChange={(e)=>{this.changeAssigned(e)}} componentClass="select" placeholder="">
                                                 <option value="">Don't assign</option>
                                                 {
-                                                    this.state.members && this.state.members.concat([Meteor.user().profile.name]).map((person, i)=>{
-                                                        return(<option value={person}>{person}</option>)
+
+                                                    this.state.members && this.state.members.map((person, i)=>{
+                                                        return(<option value={person.email}>{person.email}</option>)
                                                     })
                                                 }
+                                                <option>{Meteor.user().profile.name}</option>
                                             </FormControl>
                                           </FormGroup>
                                         {' '}
@@ -296,9 +298,10 @@ class Lists extends Component {
                                 </Well>
                                 <h3>Members</h3>
                                 <Well>
+                                    <p>{Meteor.user().profile.name}</p>
                                     {
-                                        this.state.members && this.state.members.concat([Meteor.user().profile.name]).map((person)=>{
-                                            return(<p>{person}</p>)
+                                        this.state.members && this.state.members.map((person)=>{
+                                            return(<p>{person.email}</p>)
 
                                         })
                                     }
