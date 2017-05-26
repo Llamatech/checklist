@@ -1,10 +1,7 @@
 /* global WebApp, Modules */
 
 import { Meteor } from 'meteor/meteor';
-// import '../imports/api/projects.js';
-
-
-
+import '../imports/api/checklists.js'
 
 Meteor.startup(() => {
   // code to run on server at startup

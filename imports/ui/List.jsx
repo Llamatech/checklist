@@ -3,6 +3,8 @@
 import React, {Component} from 'react';
 import {chunk} from 'lodash';
 import {Button, Well, Table, FormControl, FormGroup, ControlLabel, Form} from 'react-bootstrap';
+import SweetAlert from 'react-bootstrap-sweetalert';
+
 //import {Projects} from '../api/checklists.js';
 
 
@@ -26,10 +28,7 @@ class Lists extends Component {
         console.log(itemId);
     }
 
-    confirmation(e, itemId){
-        e.preventDefault();
-        console.log(e);
-
+    confirmation(itemId){
         console.log(itemId);
 
 
@@ -103,13 +102,16 @@ class Lists extends Component {
         //add item
     }
 
-
+    
 
     render() {
         console.log(this.props)
 
             return (
+
                 <div>
+                    {this.state.conf}
+
                         <h1>{this.props.list.name}</h1>
 
                         <hr></hr>
@@ -170,7 +172,7 @@ class Lists extends Component {
                                             this.props.list.items && this.props.list.items.map((item)=>{
                                                 return(
                                                     <tr className="item" onClick={()=>{this.toggleCheck(item._id,!item.done)}}>
-                                                        <td><a type="button" onClick={() => this.props.confirmation(item._id)} className="close" aria-label="Close">
+                                                        <td><a type="button" onClick={() => this.confirmation(item._id)} className="close" aria-label="Close">
                                 <span aria-hidden="true">
                                     <i className="fa fa-trash" aria-hidden="true"></i>
                                 </span>
@@ -223,6 +225,15 @@ class Lists extends Component {
                                 <h3>Description</h3>
                                 <Well>
                                     <p className="description">{this.props.list.description}</p>
+                                </Well>
+                                <h3>Members</h3>
+                                <Well>
+                                    {
+                                        this.props.list.sharedwith && this.props.list.sharedwith.map((person)=>{
+                                            return(<p>{person}</p>)
+
+                                        })
+                                    }
                                 </Well>
                             </div>
 

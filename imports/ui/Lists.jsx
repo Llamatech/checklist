@@ -37,9 +37,7 @@ class Lists extends Component {
         this.setState({showModal: true});
     }
 
-    addList(){
-        console.log("añadiiiiir");
-    }
+
 
     confirmation(e, listId){
         e.preventDefault();
@@ -128,7 +126,7 @@ class Lists extends Component {
                             <div className="col-md-3"></div>
                             <div className="col-md-3">
                                 <Button className="newList" onClick={this.modalOpen.bind(this)} bsStyle="primary" > <i className="fa fa-plus fa-lg fa-inverse "></i> Add new list</Button>
-                            <AddList show={this.state.showModal} modalClose={this.modalClose.bind(this)} addList={this.addList.bind(this)} />
+                            <AddList show={this.state.showModal} modalClose={this.modalClose.bind(this)}/>
                             </div>
                         </div>
 

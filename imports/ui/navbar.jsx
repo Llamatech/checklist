@@ -67,11 +67,6 @@ class Navib extends React.Component {
                   <Navbar.Toggle />
                 </Navbar.Header>
                 <Navbar.Collapse>
-                  <Nav>
-                    <NavItem className="newProj" onClick={this.modalOpen.bind(this)}>
-                      <i className="fa fa-plus fa-lg fa-inverse "></i>    Add new list
-                    </NavItem>
-                  </Nav>
                   {Meteor.user()?
                   <Nav>
                       <LinkContainer to="lists">
@@ -79,10 +74,11 @@ class Navib extends React.Component {
                       My lists
                     </NavItem>
                     </LinkContainer>
-
+                    <LinkContainer to="groups">
                     <NavItem className="newProj" onClick={this.modalOpen.bind(this)}>
                       My groups
                     </NavItem>
+                    </LinkContainer>
                   </Nav>
                       :
                   <Nav pullRight>
