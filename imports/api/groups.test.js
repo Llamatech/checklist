@@ -175,7 +175,6 @@ if(Meteor.server)
         it('Should retrieve groups that a user belongs in', function() {
             var group1 = {
                 name: 'SomeGroup',
-                description: 'Some description'
                 // owner: 'llama@llama.com',
                 // members: [{'name': 'Vicuna', 'email': 'vicuna@vicuna.com'}]
             };
