@@ -33,19 +33,28 @@ export const insertGroup = new ValidatedMethod({
             type: String,
             optional: true
         },
-        'group.members': {
-            type: Array
-        },
-        'group.members.$': {
-            type: Object,
-            blackbox: true
-        },
-        'group.owner': {
-            type: String
-        }
+        // 'group.members': {
+        //     type: Array
+        // },
+        // 'group.members.$': {
+        //     type: Object,
+        //     blackbox: true
+        // },
+        // 'group.owner': {
+        //     type: String
+        // }
     }).validator(),
     run({group}) {
-        Groups.insert(group);
+        let description = group.description;
+        if(!description) {
+            description = '';
+        }
+        Groups.insert({
+            'name': group.name,
+            'description': description,
+            'members': [],
+            'owner': getEmailFromService(Meteor.user().services)
+        });
     }
 });
 

@@ -40,9 +40,9 @@ if(Meteor.server)
         it('Should create a group', function() {
             var group = {
                 name: 'SomeGroup',
-                description: 'Some description',
-                owner: 'llama@llama.com',
-                members: []
+                description: 'Some description'
+                // owner: 'llama@llama.com',
+                // members: []
             };
             // console.log(getEmailFromService(Meteor.user().services));
 
@@ -64,9 +64,9 @@ if(Meteor.server)
         it('Should delete a group', function() {
             var group = {
                 name: 'SomeGroup',
-                description: 'Some description',
-                owner: 'llama@llama.com',
-                members: []
+                description: 'Some description'
+                // owner: 'llama@llama.com',
+                // members: []
             };
 
             Meteor.call('group.insert', {group}, function() {
@@ -149,16 +149,16 @@ if(Meteor.server)
         it('Should retrieve all user owned groups', function() {
             var group1 = {
                 name: 'SomeGroup',
-                description: 'Some description',
-                owner: 'llama@llama.com',
-                members: []
+                description: 'Some description'
+                // owner: 'llama@llama.com',
+                // members: []
             };
 
             var group2 = {
                 name: 'AnotherGroup',
-                description: 'Some description',
-                owner: 'llama@llama.com',
-                members: []
+                description: 'Some description'
+                // owner: 'llama@llama.com',
+                // members: []
             };
 
             Meteor.call('group.insert', {group: group1});
@@ -175,19 +175,27 @@ if(Meteor.server)
         it('Should retrieve groups that a user belongs in', function() {
             var group1 = {
                 name: 'SomeGroup',
-                description: 'Some description',
-                owner: 'llama@llama.com',
-                members: [{'name': 'Vicuna', 'email': 'vicuna@vicuna.com'}]
+                description: 'Some description'
+                // owner: 'llama@llama.com',
+                // members: [{'name': 'Vicuna', 'email': 'vicuna@vicuna.com'}]
+            };
+
+            var user = {
+                'name': 'Vicuna',
+                'email': 'vicuna@vicuna.com'
             };
 
             var group2 = {
                 name: 'AnotherGroup',
-                description: 'Some description',
-                owner: 'llama@llama.com',
-                members: []
+                description: 'Some description'
+                // owner: 'llama@llama.com',
+                // members: []
             };
 
             Meteor.call('group.insert', {group: group1});
+            let group = Groups.find({}).fetch()[1];
+            Meteor.call('group.addUser', {groupId: group['_id'], user: user});
+
             Meteor.call('group.insert', {group: group2});
 
             Meteor.user = function() {
