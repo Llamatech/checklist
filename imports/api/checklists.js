@@ -5,10 +5,18 @@ import {Mongo} from 'meteor/mongo';
 import ObjectId from 'bson-objectid';
 import {ValidatedMethod} from 'meteor/mdg:validated-method';
 import {SimpleSchema} from 'meteor/aldeed:simple-schema';
-import getEmailFromService from '../../server/methods/users.js';
+// import getEmailFromService from '../../server/methods/users.js';
 // import {DDPRateLimiter} from 'meteor/ddp-rate-limiter';
 
 export const Checklists = new Mongo.Collection('checklists');
+
+const getEmailFromService = ( services ) => {
+    for ( let service in services ) {
+        let current = services[ service ];
+        return service === 'twitter' ? current.screenName : current.email;
+    }
+};
+
 
 Checklists.deny({
     insert() {

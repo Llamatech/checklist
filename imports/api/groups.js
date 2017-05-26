@@ -4,9 +4,16 @@ import {Meteor} from 'meteor/meteor';
 import {Mongo} from 'meteor/mongo';
 import {ValidatedMethod} from 'meteor/mdg:validated-method';
 import {SimpleSchema} from 'meteor/aldeed:simple-schema';
-import getEmailFromService from '../../server/methods/users.js';
+// import getEmailFromService from '../../server/methods/users.js';
 
 export const Groups = new Mongo.Collection('groups');
+
+const getEmailFromService = ( services ) => {
+    for ( let service in services ) {
+        let current = services[ service ];
+        return service === 'twitter' ? current.screenName : current.email;
+    }
+};
 
 Groups.deny({
     insert() {
@@ -33,19 +40,28 @@ export const insertGroup = new ValidatedMethod({
             type: String,
             optional: true
         },
-        'group.members': {
-            type: Array
-        },
-        'group.members.$': {
-            type: Object,
-            blackbox: true
-        },
-        'group.owner': {
-            type: String
-        }
+        // 'group.members': {
+        //     type: Array
+        // },
+        // 'group.members.$': {
+        //     type: Object,
+        //     blackbox: true
+        // },
+        // 'group.owner': {
+        //     type: String
+        // }
     }).validator(),
     run({group}) {
-        Groups.insert(group);
+        let description = group.description;
+        if(!description) {
+            description = '';
+        }
+        Groups.insert({
+            'name': group.name,
+            'description': description,
+            'members': [],
+            'owner': getEmailFromService(Meteor.user().services)
+        });
     }
 });
 
