@@ -6,7 +6,7 @@ A simple and collaborative checklist for items that must be accomplished/buyed
 
 ## Build status
 [![CircleCI](https://circleci.com/gh/Llamatech/listify.svg?style=svg)](https://circleci.com/gh/Llamatech/listify)
-[![Coverage Status](https://coveralls.io/repos/github/Llamatech/review-me/badge.svg?branch=master)](https://coveralls.io/github/Llamatech/review-me?branch=master)
+[![Coverage Status](https://coveralls.io/repos/github/Llamatech/listify/badge.svg?branch=master)](https://coveralls.io/github/Llamatech/listify?branch=master)
 [![dependencies Status](https://david-dm.org/Llamatech/listify/status.svg)](https://david-dm.org/Llamatech/listify)
 
 ## Settings and configurations

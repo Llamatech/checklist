@@ -145,5 +145,68 @@ if(Meteor.server)
                 assert.equal(err.reason, 'Cannot delete user from this group because you are not its owner');
             });
         });
+
+        it('Should retrieve all user owned groups', function() {
+            var group1 = {
+                name: 'SomeGroup',
+                description: 'Some description',
+                owner: 'llama@llama.com',
+                members: []
+            };
+
+            var group2 = {
+                name: 'AnotherGroup',
+                description: 'Some description',
+                owner: 'llama@llama.com',
+                members: []
+            };
+
+            Meteor.call('group.insert', {group: group1});
+            Meteor.call('group.insert', {group: group2});
+
+            Meteor.call('group.getOwnedGroups', {}, function(err, res) {
+                if(err) {
+                    throw new Meteor.Error(err);
+                }
+                assert.equal(res.length, 2);
+            });
+        });
+
+        it('Should retrieve groups that a user belongs in', function() {
+            var group1 = {
+                name: 'SomeGroup',
+                description: 'Some description',
+                owner: 'llama@llama.com',
+                members: [{'name': 'Vicuna', 'email': 'vicuna@vicuna.com'}]
+            };
+
+            var group2 = {
+                name: 'AnotherGroup',
+                description: 'Some description',
+                owner: 'llama@llama.com',
+                members: []
+            };
+
+            Meteor.call('group.insert', {group: group1});
+            Meteor.call('group.insert', {group: group2});
+
+            Meteor.user = function() {
+                return {
+                    'services': {
+                        'facebook': {
+                            'email': 'vicuna@vicuna.com'
+                        }
+                    }
+                };
+            };
+
+            Meteor.call('group.getUserGroups', {}, function(err, res) {
+                if(err) {
+                    throw new Meteor.Error(err);
+                }
+                assert.equal(res.length, 2);
+            });
+
+        });
     });
 }

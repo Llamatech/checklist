@@ -121,3 +121,31 @@ export const deleteUserGroup = new ValidatedMethod({
         });
     }
 });
+
+export const getUserOwnedGroups = new ValidatedMethod({
+    name: 'group.getOwnedGroups',
+    validate: new SimpleSchema({}).validator(),
+    run() {
+        let email = getEmailFromService(Meteor.user().services);
+
+        return Groups.find({
+            owner: email
+        }).fetch();
+    }
+});
+
+export const getUserGroups = new ValidatedMethod({
+    name: 'group.getUserGroups',
+    validate: new SimpleSchema({}).validator(),
+    run() {
+        let email = getEmailFromService(Meteor.user().services);
+
+        return Groups.find({
+            members: {
+                $elemMatch: {
+                    email: email
+                }
+            }
+        }).fetch();
+    }
+});
