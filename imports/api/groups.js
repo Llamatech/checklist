@@ -59,7 +59,7 @@ export const insertGroup = new ValidatedMethod({
         Groups.insert({
             'name': group.name,
             'description': description,
-            'members': [],
+            'members': [{email:getEmailFromService(Meteor.user().services),name:''}],
             'owner': getEmailFromService(Meteor.user().services)
         });
     }
@@ -79,6 +79,18 @@ export const deleteGroup = new ValidatedMethod({
             throw new Meteor.Error('group.delete', 'Cannot delete this group because you are not its owner');
         }
         Groups.remove(groupId);
+    }
+});
+
+export const getGroup = new ValidatedMethod({
+    name: 'group.get',
+    validate: new SimpleSchema({
+        groupId: {
+            type: String
+        }
+    }).validator(),
+    run({groupId}) {
+        return Groups.find(groupId).fetch()[0];
     }
 });
 

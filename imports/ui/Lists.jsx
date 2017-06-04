@@ -66,7 +66,8 @@ class Lists extends Component {
         );
 
         this.setState({
-            conf: getAlert()
+            conf: getAlert(),
+            selectedList:null
         });
     }
 
@@ -84,7 +85,7 @@ class Lists extends Component {
         const getAlert = () => (
             <SweetAlert success confirmBtnText="Ok" confirmBtnBsStyle="success" title="Your list was successfully deleted" onConfirm={() => {
                 this.hideAlert();
-                //this.props.eraseProject(this.props.proyecto._id);
+                Meteor.call('checklists.delete',{checklistId:listId});
                 console.log("deleted"+listId);
             }}></SweetAlert>
         );
@@ -108,7 +109,7 @@ class Lists extends Component {
                     ? <div className="List">
 
                             <Button bsStyle="primary" style={{float:"right"}} onClick={() => this.setState({selectedList: null})} bsSize="small"><i className="fa fa-arrow-left" aria-hidden="true"></i>  Go back to my lists</Button>
-                            <List groups={this.props.groupsOwned.concat(this.props.groupsIn)} list={this.state.selectedList} owned={this.state.owned}/>
+                            <List erase={this.confirmation.bind(this)} groups={this.props.groupsOwned.concat(this.props.groupsIn)} list={this.state.selectedList} owned={this.state.owned}/>
                         </div>
                     : <div>
                         <h1 className="header">My Lists
@@ -141,6 +142,7 @@ class Lists extends Component {
                                     {
                                         this.props.listsOwned && this.props.listsOwned.map((list) => {
                                         if(patr.test(list.name)||patr.test(list.description)){
+                                            console.log(list);
                                             return(
                                                     <div>
                                                 <Well bsSize="small" className="listBut">

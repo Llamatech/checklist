@@ -18,13 +18,21 @@ class Lists extends Component {
             alertText: '',
             conf: null,
             itemName:'',
-            assignedTo:''
+            assignedTo:'',
+            items: props.list.items,
+            addMember:'',
+            addGroup:'',
+            members: props.list.sharedwith
         }
     }
 
 
-    toggleCheck(itemId, status){
-        //Meteor.call('updateItemStatus',{checklistId:this.props.list._id,itemId:itemid,status:status})
+    toggleCheck(item, status){
+        let itemId=item._id;
+        Meteor.call('checklists.updateItemStatus',{checklistId:this.props.list._id,itemId:itemId,status:status});
+        item.done=status;
+        this.setState({});
+
         console.log(itemId);
     }
 
@@ -70,7 +78,9 @@ class Lists extends Component {
         const getAlert = () => (
             <SweetAlert success confirmBtnText="Ok" confirmBtnBsStyle="success" title="Your item was successfully deleted" onConfirm={() => {
                 this.hideAlert();
-                //this.props.eraseProject(this.props.proyecto._id);
+                Meteor.call('checklists.deleteItem',{checklistId:this.props.list._id, itemId:itemId},(err, res)=>{
+                    this.setState({items:res})
+                });
                 console.log("deleted"+itemId);
             }}></SweetAlert>
         );
@@ -93,16 +103,73 @@ class Lists extends Component {
 
     }
 
+    changePerson(e){
+        console.log(e.target.value);
+        this.setState({addMember: e.target.value});
+    }
+
+    changeGroup(e){
+        var group = (e.target.value);
+        console.log(group)
+        this.setState({addGroup:group});
+    }
+
+
+
     addItem(e){
         e.preventDefault();
         var name = this.state.itemName;
         var assigned = this.state.assignedTo;
         console.log(name);
         console.log(assigned);
+        var item = {}
+        var checklistId = this.props.list._id;
+        item.name=name;
+        item.quantity=0;
+        item.assignedTo=assigned?[assigned]:[];
+        item.createdAt= new Date();
+        item.completeBefore = new Date();
+        item.priority = 0;
+        item.done = false;
+        Meteor.call('checklists.addItem',{checklistId:checklistId,item:item},(err, res)=>{
+            this.setState({items:res,itemName:'',
+            assignedTo:''});
+        });
         //add item
     }
 
-    
+    addMember(e){
+        e.preventDefault();
+        console.log(this.state.addMember);
+        Meteor.call('checklists.addUser',{checklistId:this.props.list._id,user:{email:this.state.addMember,name:' ',writePerm:true}},(err,res)=>{
+                console.log(err);
+                this.setState({members:res,addMember:''})
+        })
+
+    }
+
+    addGroup(e){
+        e.preventDefault();
+        console.log(this.state.addGroup);
+        Meteor.call('group.get',{groupId:this.state.addGroup},(err,res)=>{
+            console.log(err);
+            console.log(res);
+            res.members.map((user)=>{
+                Meteor.call('checklists.addUser',{checklistId:this.props.list._id,user:{email:user.email,name:' ',writePerm:true}},(err,res)=>{
+                        console.log(err);
+                        this.setState({members:res,addMember:''})
+                })
+            })
+        })
+
+    }
+
+    eraseList(e){
+        this.props.erase(e, this.props.list._id);
+
+    }
+
+
 
     render() {
         console.log(this.props)
@@ -112,22 +179,22 @@ class Lists extends Component {
                 <div>
                     {this.state.conf}
 
-                        <h1>{this.props.list.name}</h1>
+                        <h1>{this.props.list.name}<small>   {this.props.list.completeBefore.toString()}</small></h1>
 
                         <hr></hr>
                         <div className="row">
                             <div className="col-md-2">
-                                <Button bsStyle="danger">Erase list</Button>
+                                <Button onClick={(e)=>{this.eraseList(e)}} bsStyle="danger">Erase list</Button>
                             </div>
                             <div className="col-md-5">
                                 <Form inline>
                                   <FormGroup controlId="formInlineName">
                                     <ControlLabel className="addPersonLabel">Add member: </ControlLabel>
                                     {' '}
-                                    <FormControl className="addPerson" type="text" value={this.state.term} placeholder="mom@gmail.com" onChange={this.changeTerm.bind(this)}/>
+                                    <FormControl className="addPerson" type="text" value={this.state.term} placeholder="mom@gmail.com" onChange={this.changePerson.bind(this)}/>
                                   </FormGroup>
                                   {'  '}
-                                  <Button bsSize="small" className="addItem" type="submit" onClick={(e)=>{this.addItem(e)}}>
+                                  <Button bsSize="small" className="addItem" type="submit" onClick={(e)=>{this.addMember(e)}}>
                                     Add
                                   </Button>
                                 </Form>
@@ -137,17 +204,17 @@ class Lists extends Component {
                                     <FormGroup controlId="formControlsSelect">
                                         <ControlLabel className="addGroupLabel">Add group:  </ControlLabel>
 
-                                        <FormControl className="addGroup" componentClass="select" placeholder="">
+                                        <FormControl onChange={(e)=>{this.changeGroup(e)}} className="addGroup" componentClass="select" placeholder="">
                                             <option value="">select</option>
                                             {
                                                 this.props.groups && this.props.groups.map((group)=>{
-                                                    return(<option value={group.name}>{group.name}</option>)
+                                                    return(<option value={group._id}>{group.name}</option>)
                                                 })
                                             }
                                         </FormControl>
                                       </FormGroup>
                                   {'  '}
-                                  <Button bsSize="small" className="addItem" type="submit" onClick={(e)=>{this.addItem(e)}}>
+                                  <Button bsSize="small" className="addItem" type="submit" onClick={(e)=>{this.addGroup(e)}}>
                                     Add
                                   </Button>
                                 </Form>
@@ -169,9 +236,10 @@ class Lists extends Component {
                                     </thead>
                                     <tbody>
                                         {
-                                            this.props.list.items && this.props.list.items.map((item)=>{
+                                            this.state.items && this.state.items.map((item)=>{
+                                                console.log(item)
                                                 return(
-                                                    <tr className="item" onClick={()=>{this.toggleCheck(item._id,!item.done)}}>
+                                                    <tr className="item" onClick={()=>{this.toggleCheck(item,!item.done)}}>
                                                         <td><a type="button" onClick={() => this.confirmation(item._id)} className="close" aria-label="Close">
                                 <span aria-hidden="true">
                                     <i className="fa fa-trash" aria-hidden="true"></i>
@@ -179,9 +247,9 @@ class Lists extends Component {
                             </a></td>
                                                       <td>{item.name}</td>
                                                       <td>{item.addedBy}</td>
-                                                      <td>{item.assignedTo}</td>
+                                                      <td>{item.assignedTo[0]}</td>
                                                       <td>{
-                                                          item.done?
+                                                          !item.done?
                                                           <i className="fa fa-circle-o fa-lg notDone"></i>
                                                           :
                                                           <i className="fa fa-check-circle-o fa-lg done"></i>
@@ -206,10 +274,12 @@ class Lists extends Component {
                                             <FormControl onChange={(e)=>{this.changeAssigned(e)}} componentClass="select" placeholder="">
                                                 <option value="">Don't assign</option>
                                                 {
-                                                    this.props.list.sharedwith && this.props.list.sharedwith.map((person, i)=>{
-                                                        return(<option value={person}>{person}</option>)
+
+                                                    this.state.members && this.state.members.map((person, i)=>{
+                                                        return(<option value={person.email}>{person.email}</option>)
                                                     })
                                                 }
+                                                <option>{Meteor.user().profile.name}</option>
                                             </FormControl>
                                           </FormGroup>
                                         {' '}
@@ -228,9 +298,10 @@ class Lists extends Component {
                                 </Well>
                                 <h3>Members</h3>
                                 <Well>
+                                    <p>{Meteor.user().profile.name}</p>
                                     {
-                                        this.props.list.sharedwith && this.props.list.sharedwith.map((person)=>{
-                                            return(<p>{person}</p>)
+                                        this.state.members && this.state.members.map((person)=>{
+                                            return(<p>{person.email}</p>)
 
                                         })
                                     }

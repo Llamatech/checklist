@@ -2,9 +2,9 @@
  no-unused-vars */
 import React, {Component} from 'react';
 import {chunk} from 'lodash';
-import {FormGroup, FormControl, Button, ControlLabel, Well} from 'react-bootstrap';
+import {FormGroup, FormControl, Button, ControlLabel, Well, Modal} from 'react-bootstrap';
 
-//import AddGroup from './AddGroup.jsx';
+import AddGroup from './AddGroup.jsx';
 //import Group from './Group.jsx'
 
 import SweetAlert from 'react-bootstrap-sweetalert';
@@ -21,8 +21,13 @@ class Groups extends Component {
             owned:false,
             alert: false,
             alertText: '',
-            conf: null
+            conf: null,
+            showAdd:false,
+            showRemove:false,
+            addMember:''
         }
+
+        this.addMember=this.addMember.bind(this);
     }
 
     changeTerm(e) {
@@ -35,6 +40,24 @@ class Groups extends Component {
 
     modalOpen() {
         this.setState({showModal: true});
+    }
+
+    addClose() {
+        this.setState({showAdd: false});
+    }
+
+    addOpen(group) {
+        console.log("open el puto add")
+        console.log(group);
+        this.setState({showAdd: true, selectedGroup: group});
+    }
+
+    removeClose() {
+        this.setState({showRemove: false});
+    }
+
+    removeOpen() {
+        this.setState({showRemove: true});
     }
 
     addGroup(){
@@ -86,7 +109,7 @@ class Groups extends Component {
         const getAlert = () => (
             <SweetAlert success confirmBtnText="Ok" confirmBtnBsStyle="success" title="Your group was successfully deleted" onConfirm={() => {
                 this.hideAlert();
-                //this.props.eraseProject(this.props.proyecto._id);
+                Meteor.call('group.delete',{groupId:groupId})
                 console.log("deleted"+groupId);
             }}></SweetAlert>
         );
@@ -98,20 +121,60 @@ class Groups extends Component {
         this.setState({conf: null});
     }
 
+    addMember(e){
+        e.preventDefault();
+        //console.log(this.state.addMember)
+        console.log(e);
+
+        Meteor.call('group.addUser', {groupId:this.state.selectedGroup._id, user:{email:this.state.addMember,name:''}})
+
+    }
+
+    handleMemberChange(e){
+        this.setState({addMember:e.target.value})
+    }
+
 
     render() {
         var patr = new RegExp(this.state.term,"i");
 
         return (
             <div>
+
                 {this.state.conf}
 
-                {this.state.selectedGroup
-                    ? <div className="Group">
+                <Modal show={this.state.showAdd} onHide={()=>this.addClose()}>
+                  <Modal.Header closeButton>
+                    <Modal.Title>Add a new Member to your group</Modal.Title>
+                  </Modal.Header>
+                  <Modal.Body>
 
-                            <Button bsStyle="primary" style={{float:"right"}} onClick={() => this.setState({selectedGroup: null})} bsSize="small"><i className="fa fa-arrow-left" aria-hidden="true"></i>  Go back to my groups</Button>
-                        </div>
-                    : <div>
+                    <form onSubmit={this.addMember.bind(this)}>
+                      <FormGroup controlId="formBasicText">
+                        <ControlLabel>Member's identifier:</ControlLabel>
+
+                        <FormControl
+                          type="text"
+                          value={this.state.name}
+                          placeholder="mom@google.com"
+                          onChange={this.handleMemberChange.bind(this)}
+                        />
+                        <FormControl.Feedback />
+                      </FormGroup>
+                      <FormGroup>
+                          <Button type="submit">
+                            Create
+                          </Button>
+                      </FormGroup>
+                    </form>
+
+                  </Modal.Body>
+                  <Modal.Footer>
+                    <a onClick={()=>this.addClose()}>Close</a>
+                  </Modal.Footer>
+                </Modal>
+
+
                         <h1 className="header">My Groups
                         </h1>
                         <hr></hr>
@@ -127,7 +190,7 @@ class Groups extends Component {
                             <div className="col-md-3"></div>
                             <div className="col-md-3">
                                 <Button className="newGroup" onClick={this.modalOpen.bind(this)} bsStyle="primary" > <i className="fa fa-plus fa-lg fa-inverse "></i> Add new group</Button>
-                            {/*<AddGroup show={this.state.showModal} modalClose={this.modalClose.bind(this)} addGroup={this.addGroup.bind(this)} />*/}
+                            <AddGroup show={this.state.showModal} modalClose={this.modalClose.bind(this)} addGroup={this.addGroup.bind(this)} />
                             </div>
                         </div>
 
@@ -153,17 +216,31 @@ class Groups extends Component {
 
                                                         <div className="groupWell col-md-11" onClick={()=>{this.setState({selectedGroup: group,owned:true})}}>
                                                         {console.log(group.name)}
-                                                        <h4>{group.name}</h4>
+                                                        <h3>{group.name}</h3>
                                                         <div className="row">
                                                             <div className="col-md-6">
                                                         <p>
                                                             {group.description}
                                                         </p>
+                                                        <h4>Members</h4>
+                                                        <ul>
+                                                            {
+                                                                group.members && group.members.map((member)=>{
+                                                                    return(<li>{member.email}</li>)
+                                                                })
+                                                            }
+                                                        </ul>
                                                     </div>
                                                     <div className="col-md-6">
-                                                        <i className="fa fa-check done"></i>   <strong>Tasks completed: </strong>{group.completed}
-                                                        <br></br>
-                                                        <i className="fa fa-circle-o notDone"></i>    <strong>  Tasks pending: </strong>{group.pending}
+                                                        <div className="row">
+                                                            <div className="col-md-6">
+                                                                {console.log(group)}
+                                                                <Button bsSize="small" className="newGroup" onClick={()=>{this.addOpen(group)}} bsStyle="primary" > <i className="fa fa-plus fa-lg fa-inverse "></i> Add member</Button>
+                                                            </div>
+                                                            <div className="col-md-6">
+                                                                <Button bsSize="small" className="newGroup" onClick={this.removeOpen.bind(this)} bsStyle="danger" > <i className="fa fa-minus fa-lg fa-inverse "></i> Remove member</Button>
+                                                            </div>
+                                                        </div>
                                                     </div>
                                                         </div>
                                                         </div>
@@ -180,7 +257,7 @@ class Groups extends Component {
                                 </div>
 
                                 <div className="col-md-6 owned">
-                                    <h2>Groups shared with me</h2>
+                                    <h2>Groups I'm in</h2>
                                     <hr></hr>
                                     {
                                         this.props.groupsIn && this.props.groupsIn.map((group) => {
@@ -201,11 +278,14 @@ class Groups extends Component {
                                                         <br></br>
                                                         <strong>Owner: </strong>{group.owner}
                                                     </p>
-                                                </div>
-                                                <div className="col-md-6">
-                                                    <i className="fa fa-check done"></i>   <strong>Tasks completed: </strong>{group.completed}
-                                                    <br></br>
-                                                    <i className="fa fa-circle-o notDone"></i>    <strong>  Tasks pending: </strong>{group.pending}
+                                                    <h4>Members</h4>
+                                                    <ul>
+                                                        {
+                                                            group.members && group.members.map((member)=>{
+                                                                return(<li>{member.email}</li>)
+                                                            })
+                                                        }
+                                                    </ul>
                                                 </div>
                                                     </div>
                                                     </div>
@@ -226,8 +306,7 @@ class Groups extends Component {
 
                         </div>
                     </div>
-                }
-            </div>
+
 
         );
 

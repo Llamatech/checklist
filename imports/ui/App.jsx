@@ -8,6 +8,7 @@ import {createContainer} from 'meteor/react-meteor-data';
 import Navib from './navbar.jsx';
 import Landing from './Landing.jsx'
 import {Checklists} from '../api/checklists.js';
+import {Groups} from '../api/groups.js';
 
 class App extends Component {
     constructor(props){
@@ -105,8 +106,12 @@ export default createContainer(() => {
 
     if(!Meteor.user()){
         console.log("nonas")
-        return {listsOwned:[],
-        listsShared:[]};
+        return {
+            listsOwned:[],
+        listsShared:[],
+        groupsOwned: [],
+        groupsIn: []
+    };
     }
     else{
         console.log('sisas')
@@ -126,16 +131,41 @@ export default createContainer(() => {
     }
     console.log(emailsito)
 
-    return {listsOwned:Checklists.find({
+
+
+    return {
+        listsOwned:Checklists.find({
         owner: emailsito
     }).fetch(),
     listsShared:Checklists.find({
         sharedwith: {
+                $elemMatch: {
+                    email: emailsito
+                }
+            }
+    }).fetch().filter((obj)=>{
+        if (obj.owner===emailsito){
+            return false;
+        }
+        return true;
+    }),
+    groupsOwned: Groups.find({
+        owner: emailsito
+    }).fetch(),
+    groupsIn: Groups.find(
+        {
+        members: {
             $elemMatch: {
                 email: emailsito
             }
         }
-    }).fetch()};
+    }).fetch().filter((obj)=>{
+        if (obj.owner===emailsito){
+            return false;
+        }
+        return true;
+    })
+};
 
 }
 
